@@ -26,7 +26,7 @@
 from math import *
 import sys
 import argparse
-import Bio.Statistics.lowess as biostat
+import statsmodels.nonparametric.smoothers_lowess as statlow
 import numpy as np
 
 
@@ -44,7 +44,8 @@ def correct(sample, gcCount, binSize, maxN=0.1, minRD=0.0001, fVal=0.1, iVal=3):
 
     allX = np.array(allX, np.float)
     allY = np.array(allY, np.float)
-    lowessCurve = biostat.lowess(allX, allY, f=fVal, iter=iVal).tolist()
+    delta = 0.01 * len(allX)
+    lowessCurve = statlow.lowess(allY, allX, return_sorted=False, delta=delta, frac=fVal, it=iVal).tolist()
 
     correctedSample = dict()
     for chrom in chroms:
