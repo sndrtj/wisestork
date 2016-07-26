@@ -29,39 +29,42 @@ import argparse
 import Bio.Statistics.lowess as biostat
 import numpy as np
 
-def correct(sample,gcCount,binSize,maxN=0.1,minRD=0.0001,fVal=0.1,iVal=3):
+
+def correct(sample, gcCount, binSize, maxN=0.1, minRD=0.0001, fVal=0.1, iVal=3):
     allX = []
     allY = []
 
     chroms = sample.keys()
 
     for chrom in chroms:
-        for bin in range(min(len(gcCount[chrom]),len(sample[chrom]))):
-            if gcCount['N'+chrom][bin] < binSize * maxN and sample[chrom][bin] > binSize * minRD:
+        for bin in range(min(len(gcCount[chrom]), len(sample[chrom]))):
+            if gcCount['N' + chrom][bin] < binSize * maxN and sample[chrom][bin] > binSize * minRD:
                 allX.append(gcCount[chrom][bin])
                 allY.append(sample[chrom][bin])
 
-    allX = np.array(allX,np.float)
-    allY = np.array(allY,np.float)
-    lowessCurve = biostat.lowess(allX,allY,f=fVal, iter=iVal).tolist()
-    
+    allX = np.array(allX, np.float)
+    allY = np.array(allY, np.float)
+    lowessCurve = biostat.lowess(allX, allY, f=fVal, iter=iVal).tolist()
+
     correctedSample = dict()
     for chrom in chroms:
         correctedSample[chrom] = []
-        for bin in range(min(len(gcCount[chrom]),len(sample[chrom]))):
-            if gcCount['N'+chrom][bin] < binSize * maxN and sample[chrom][bin] > binSize * minRD:
-                correctedValue = sample[chrom][bin]/lowessCurve.pop(0)
+        for bin in range(min(len(gcCount[chrom]), len(sample[chrom]))):
+            if gcCount['N' + chrom][bin] < binSize * maxN and sample[chrom][bin] > binSize * minRD:
+                correctedValue = sample[chrom][bin] / lowessCurve.pop(0)
                 correctedSample[chrom].append(correctedValue)
             else:
                 correctedSample[chrom].append(0)
 
     return correctedSample
 
+
 if __name__ == "__main__":
     import pickle
     import argparse
+
     parser = argparse.ArgumentParser(description='Correct a sample for GC-Content using a LOESS function',
-            formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument('infile', type=str,
                         help='directory containing samples to be used as reference (pickle)')
@@ -88,15 +91,15 @@ if __name__ == "__main__":
     argsKeys = argsDict.keys()
     argsKeys.sort()
     for arg in argsKeys:
-        print '\t'.join([arg,str(argsDict[arg])])
+        print '\t'.join([arg, str(argsDict[arg])])
 
     print '\n# Processing:'
     print 'Loading:\tSample:\t' + args.infile
-    sample = pickle.load(open(args.infile,'rb'))
+    sample = pickle.load(open(args.infile, 'rb'))
     print 'Loading:\tGC-Count:\t' + args.gccount
-    gcCount = pickle.load(open(args.gccount,'rb'))
+    gcCount = pickle.load(open(args.gccount, 'rb'))
     print 'Correcting'
-    corrected = correct(sample,gcCount,args.binsize,args.maxn,args.minrd,args.fval,args.ival)
+    corrected = correct(sample, gcCount, args.binsize, args.maxn, args.minrd, args.fval, args.ival)
     print 'Writing to file'
-    pickle.dump(corrected,open(args.outfile,'wb'))
+    pickle.dump(corrected, open(args.outfile, 'wb'))
     print '\n# Finished'

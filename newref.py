@@ -29,8 +29,9 @@ import pickle
 import gcc
 import argparse
 
-parser = argparse.ArgumentParser(description='Create a new reference table from a set of reference samples, outputs table as pickle to a specified output file',
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+parser = argparse.ArgumentParser(
+    description='Create a new reference table from a set of reference samples, outputs table as pickle to a specified output file',
+    formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
 parser.add_argument('refdir', type=str,
                     help='directory containing samples to be used as reference (pickle)')
@@ -47,20 +48,21 @@ argsDict = args.__dict__
 argsKeys = argsDict.keys()
 argsKeys.sort()
 for arg in argsKeys:
-    print '\t'.join([arg,str(argsDict[arg])])
+    print '\t'.join([arg, str(argsDict[arg])])
 
 print '\n# Processing:'
 
+
 # Calculate distances from each bin from chromosome i to every bin of chromosome j
-def getDistanceTable(controls,iChrom,jChrom):
+def getDistanceTable(controls, iChrom, jChrom):
     chromosomeDistances = []
     # For each bin...
     iLen = max([len(controls[key][iChrom]) for key in controls.keys()])
-    for iBin in range(0,iLen):
+    for iBin in range(0, iLen):
         binDistances = []
         # For every other bin...
         jLen = max([len(controls[key][jChrom]) for key in controls.keys()])
-        for jBin in range(0,jLen):
+        for jBin in range(0, jLen):
             # Take the difference over all samples...
             distance = 0
             distances = []
@@ -74,7 +76,7 @@ def getDistanceTable(controls,iChrom,jChrom):
                 if jBin < len(controls[control][jChrom]):
                     jVal = controls[control][jChrom][jBin]
                 # Calculate the distance
-                distance += pow((iVal - jVal),2)
+                distance += pow((iVal - jVal), 2)
                 # Don't try to match with 0 bins later on, -1 if iBin or jBin is zerobin
                 if (iVal == 0) or (jVal == 0):
                     distance = -1
@@ -83,7 +85,7 @@ def getDistanceTable(controls,iChrom,jChrom):
                 distances.append(distance)
             # Append new found distance
             if args.ignore > 0 and len(distances) > 0 and distance != -1:
-                distances.sort() # yeah
+                distances.sort()  # yeah
                 binDistances.append(sum(distances[:-args.ignore]))
             else:
                 binDistances.append(distance)
@@ -91,17 +93,18 @@ def getDistanceTable(controls,iChrom,jChrom):
         chromosomeDistances.append(binDistances)
     return chromosomeDistances
 
+
 # Load the reference samples
 print 'Loading reference samples'
-controls    = dict()
+controls = dict()
 referenceFiles = glob.glob(args.refdir + '/*.gcc')
 for refFile in referenceFiles:
     print '\tLoading:\t' + refFile
-    curFile = pickle.load(open(refFile,'rb'))
+    curFile = pickle.load(open(refFile, 'rb'))
     controls[refFile] = curFile
 
 print 'Building reference table'
-chromList = [str(chrom) for chrom in range(1,23)]
+chromList = [str(chrom) for chrom in range(1, 23)]
 refTable = dict()
 for chrom in chromList:
     refTable[chrom] = []
@@ -111,16 +114,17 @@ for iChrom in chromList:
     jChroms = dict()
     for jChrom in chromList:
         print '\t\tCalculating distances to chromosome:\t' + str(jChrom)
-        jChroms[jChrom] = getDistanceTable(controls,iChrom,jChrom)
+        jChroms[jChrom] = getDistanceTable(controls, iChrom, jChrom)
 
     # Remove own chromosome from the list of referable chromosomes
     iChromBins = jChroms.pop(iChrom)
     print '\t\tPicking reference bins'
     for iBin in range(len(iChromBins)):
         # Tuple: [Value,Bin,Chromosome]
-        topRanks = [[sys.maxint,-1,'']] * 250 # plenty of spots to go around...
+        topRanks = [[sys.maxint, -1, '']] * 250  # plenty of spots to go around...
 
-        def updateBestBins(bins,chrom):
+
+        def updateBestBins(bins, chrom):
             # Return position of the worst bin in our list
             def getWorstPos():
                 worstPos = 0
@@ -134,12 +138,13 @@ for iChrom in chromList:
                 # Zero bins are marked by -1, ignore them
                 if float(bins[i]) >= 0:
                     if float(bins[i]) < topRanks[worstPos][0]:
-                        topRanks[worstPos] = [float(bins[i]),i,chrom]
+                        topRanks[worstPos] = [float(bins[i]), i, chrom]
                         worstPos = getWorstPos()
+
 
         # Read and process line for each file we have of autosomal chromosomes
         for jChrom in jChroms.keys():
-            updateBestBins(jChroms[jChrom][iBin],jChrom)
+            updateBestBins(jChroms[jChrom][iBin], jChrom)
 
         # Don't take bins close to eachother, take the best one instead
         minDistance = 2
@@ -148,7 +153,7 @@ for iChrom in chromList:
         lastBin = 0
         tempList = []
         for bin in topRanks:
-            if (bin[2] == lastChrom) and (abs(bin[1]-lastBin) < minDistance):
+            if (bin[2] == lastChrom) and (abs(bin[1] - lastBin) < minDistance):
                 tempList.append(bin)
             else:
                 bestPos = 0
@@ -157,8 +162,8 @@ for iChrom in chromList:
                         bestPos = temp
                 # remove best bin from list to remove
                 if tempList != []:
-                    tempList.pop(bestPos) 
-                # add other bins to the remove list
+                    tempList.pop(bestPos)
+                    # add other bins to the remove list
                 remove += tempList
                 tempList = [bin]
             lastBin = bin[1]
@@ -167,7 +172,7 @@ for iChrom in chromList:
         for bin in remove:
             topRanks.remove(bin)
 
-        #print '\t\tSorting reference bins'
+        # print '\t\tSorting reference bins'
         topRanks.sort()
         tempTop = []
         for jBin in topRanks:

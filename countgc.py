@@ -27,8 +27,9 @@ import sys
 import pickle
 import argparse
 
-parser = argparse.ArgumentParser(description='Create GC-count file for GC-corrections. Outputs table as pickle to a specified output file',
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+parser = argparse.ArgumentParser(
+    description='Create GC-count file for GC-corrections. Outputs table as pickle to a specified output file',
+    formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
 parser.add_argument('reffile', type=str,
                     help='reference file used to map reads to (hg19 etc)')
@@ -40,21 +41,20 @@ parser.add_argument('-binsize', type=int, default=1000000,
 
 args = parser.parse_args()
 
-filename    = args.reffile
+filename = args.reffile
 binSize = args.binsize
 
 gcCounts = dict()
-for chrom in range(1,23):
+for chrom in range(1, 23):
     gcCounts[str(chrom)] = []
 gcCounts['X'] = []
 gcCounts['Y'] = []
 
 nCounts = dict()
-for chrom in range(1,23):
+for chrom in range(1, 23):
     nCounts[str(chrom)] = []
 nCounts['X'] = []
 nCounts['Y'] = []
-
 
 key = ''
 start = 0
@@ -70,16 +70,18 @@ def finishBin():
     global start
     global key
     if key in gcCounts:
-        binNumber = (start+totalCount) / binSize - 1
+        binNumber = (start + totalCount) / binSize - 1
         while len(gcCounts[key]) <= binNumber:
             gcCounts[key].append(0)
             nCounts[key].append(0)
         gcCounts[key][binNumber] = gcCount
         nCounts[key][binNumber] = nCount
 
-        print "\tChr: "+str(key)+"\tBin: "+str(binNumber)+"\t-\tGCC: "+str(gcCount)+"\tNC: "+str(nCount)+"\tTotal: "+str(totalCount)#+"\tStart: "+str(start)
+        print "\tChr: " + str(key) + "\tBin: " + str(binNumber) + "\t-\tGCC: " + str(gcCount) + "\tNC: " + str(
+            nCount) + "\tTotal: " + str(totalCount)  # +"\tStart: "+str(start)
     gcCount = 0.
     nCount = 0.
+
 
 f = open(filename, 'r')
 for nextLine in f:
@@ -87,7 +89,7 @@ for nextLine in f:
         finishBin()
         totalCount = 0
         splitLine = nextLine.split()
-        key   = splitLine[0][1:]
+        key = splitLine[0][1:]
         if key[:3] == 'chr':
             key = key[3:]
         start = 0
@@ -95,7 +97,7 @@ for nextLine in f:
     elif key in gcCounts.keys():
         rstripLine = nextLine.rstrip()
         for char in rstripLine:
-            if char in 'GgCc': # Beware the softmasked fasta files...
+            if char in 'GgCc':  # Beware the softmasked fasta files...
                 gcCount += 1
             elif char in 'Nn':
                 nCount += 1
@@ -107,7 +109,7 @@ finishBin()
 
 # Now put it all together in a single dict for ease of use
 for chrom in nCounts.keys():
-    gcCounts['N'+chrom]=nCounts[chrom]
-    
+    gcCounts['N' + chrom] = nCounts[chrom]
+
 # And dump it to a file
 pickle.dump(gcCounts, open(args.gccout, 'wb'))

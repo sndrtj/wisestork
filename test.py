@@ -37,13 +37,13 @@ import numpy
 
 numpy.seterr('ignore')
 
-class WiseCondorTest(object):
 
-    def __init__(self, samplefile, referencefile, binsize=1000*1000,verbose=True, *args, **kwargs):
+class WiseCondorTest(object):
+    def __init__(self, samplefile, referencefile, binsize=1000 * 1000, verbose=True, *args, **kwargs):
 
         self.samplefile = samplefile
-        self.sample = self.readpickle( samplefile )
-        self.reference = self.readpickle( referencefile )
+        self.sample = self.readpickle(samplefile)
+        self.reference = self.readpickle(referencefile)
 
         self.refmaxbin = kwargs.get('refmaxbin')
         self.refminbin = kwargs.get('refminbin')
@@ -54,19 +54,18 @@ class WiseCondorTest(object):
         self.STOUFFER_CUTOFF = 3
         self.BINSIZE = binsize
         self.verbose = verbose
-        
+
         # variables to fill during the run:
-        
+
         self.markedbins = []
         self.zscores = {}
         self.markedsmoothbins = []
         self.zsmooth = {}
         self.blinds = {}
-        
 
     def readpickle(self, picklefile):
         fd = self.readfile(picklefile)
-        contents = pickle.load( fd )
+        contents = pickle.load(fd)
         fd.close()
         return contents
 
@@ -85,7 +84,7 @@ class WiseCondorTest(object):
             return reference
 
         for value in self.reference[chrom][bin]:
-            if [int(value[0]),value[1]] in [marked[:2] for marked in markedBins]:
+            if [int(value[0]), value[1]] in [marked[:2] for marked in markedBins]:
                 """
                     Skip processing is a certain bin combination is already in the markedBins
                 """
@@ -97,7 +96,7 @@ class WiseCondorTest(object):
                 if value[2] <= maxDist:
                     reference.append(self.sample[value[0]][value[1]])
                 else:
-                    break # Stop trying, only worse bins to come
+                    break  # Stop trying, only worse bins to come
 
         # Ignore bin because of too few reference bins
         if len(reference) < self.refminbin:
@@ -107,57 +106,55 @@ class WiseCondorTest(object):
 
     def checkAverageDeviation(self, maxDist):
         sample = self.sample
-        
+
         deviations = []
-        for chrom in range(1,23):
-            for bin in range(0, len(self.sample[str(chrom)])-1 ):
+        for chrom in range(1, 23):
+            for bin in range(0, len(self.sample[str(chrom)]) - 1):
                 reference = self.getReference(str(chrom), bin, [], maxDist)
-                dev = numpy.std(reference)/numpy.median(reference)
+                dev = numpy.std(reference) / numpy.median(reference)
                 if not math.isnan(dev):
                     deviations.append(dev)
 
         avgDev = numpy.average(deviations)
         if self.verbose:
-            devString = 'Average allowed deviation: ' + str(avgDev*100*3)[:5] + '%'
-            if avgDev*3 > 0.05: # Unlikely to call anything sensible when over 5% deviation is considered normal
+            devString = 'Average allowed deviation: ' + str(avgDev * 100 * 3)[:5] + '%'
+            if avgDev * 3 > 0.05:  # Unlikely to call anything sensible when over 5% deviation is considered normal
                 devString += '\tWARNING: High value (>5%) calls are unreliable'
             logger.warn(devString)
-        return avgDev*3
-
+        return avgDev * 3
 
     def getZScore(self, value, reference):
-        average    = numpy.average(reference)
-        stddev    = numpy.std(reference)
+        average = numpy.average(reference)
+        stddev = numpy.std(reference)
 
         if stddev == 0:
             return 0
         Z = (value - average) / stddev
         return Z
 
-
     def markBins(self, maxDist, smoothRange=None):
-        totalBins = sum([len(self.sample[str(chrom)]) for chrom in range(1,23)])
-        prevMarks = [[0,0,0]]
+        totalBins = sum([len(self.sample[str(chrom)]) for chrom in range(1, 23)])
+        prevMarks = [[0, 0, 0]]
         markedBins = []
         rounds = 1
         zScoresDict = dict()
         zSmoothDict = dict()
         blindsDict = dict()
-        
+
         if not smoothRange:
             smoothRange = self.window
-        
-    
-        while ([marked[:2] for marked in prevMarks] != [marked[:2] for marked in markedBins]) and rounds <= self.maxrounds:
+
+        while (
+            [marked[:2] for marked in prevMarks] != [marked[:2] for marked in markedBins]) and rounds <= self.maxrounds:
             logger.info('\tRound: ' + str(rounds) + '\tMarks: ' + str(len(markedBins)))
-            
+
             proBins = 0
             rounds += 1
             prevMarks = markedBins
             markedBins = []
             storeLen = 0
 
-            for chrom in range(1,23):
+            for chrom in range(1, 23):
                 startBin = 0
                 endBin = 0
                 zScores = []
@@ -166,9 +163,9 @@ class WiseCondorTest(object):
                 avgBins = 0
                 average = 0
 
-                for bin in range(0,len(self.sample[str(chrom)])-1):
+                for bin in range(0, len(self.sample[str(chrom)]) - 1):
                     value = self.sample[str(chrom)][bin]
-                    reference = self.getReference(str(chrom),bin,prevMarks,maxDist)
+                    reference = self.getReference(str(chrom), bin, prevMarks, maxDist)
                     zValue = self.getZScore(value, reference)
 
                     if abs(zValue) > 0:
@@ -178,8 +175,8 @@ class WiseCondorTest(object):
                     if reference == []:
                         blinds.append(bin)
 
-                    if (abs(zValue) >= 3):# and not ([chrom,bin] in [marked[:2] for marked in markedBins]):
-                        markedBins.append([chrom,bin,zValue])
+                    if (abs(zValue) >= 3):  # and not ([chrom,bin] in [marked[:2] for marked in markedBins]):
+                        markedBins.append([chrom, bin, zValue])
 
                     zScores.append(zValue)
 
@@ -189,7 +186,6 @@ class WiseCondorTest(object):
         if self.verbose:
             print 'Stopped\tMarks: ' + str(len(markedBins))
 
-
         # This part is for the windowed and chromosome wide scoring
         markedSmoothBins = []
         for chrom in zScoresDict:
@@ -198,53 +194,52 @@ class WiseCondorTest(object):
                 """
                     Slice a window out of the zScoresDict to apply smooting on
                 """
-                slice_start = max(0,bin-smoothRange)
-                slice_end = min(bin+smoothRange+1,len(zScoresDict[str(chrom)]))
+                slice_start = max(0, bin - smoothRange)
+                slice_end = min(bin + smoothRange + 1, len(zScoresDict[str(chrom)]))
                 temp = zScoresDict[str(chrom)][slice_start:slice_end]
                 temp = numpy.array(temp)
                 # Remove NaN values from the set
                 temp = temp[~numpy.isnan(temp)]
                 temp.sort()
-                temp = temp[1:-1] # why strip the first and last item?
+                temp = temp[1:-1]  # why strip the first and last item?
                 zSmooth[bin] = numpy.sum(temp) / numpy.sqrt(len(temp))
                 zSmoothDict[chrom] = zSmooth
 
-            for bin in range(0,len(zSmooth)):
+            for bin in range(0, len(zSmooth)):
 
                 if (abs(zSmooth[bin]) >= 3):
-                    markedSmoothBins.append([chrom,bin,zSmooth[bin]])
+                    markedSmoothBins.append([chrom, bin, zSmooth[bin]])
 
         markedBins.sort()
-        
+
         self.markedbins = markedBins
         self.zscores = zScoresDict
         self.markedsmoothbins = markedSmoothBins
         self.zsmooth = zScoresDict
         self.blinds = blindsDict
-        
+
         return markedBins, zScoresDict, markedSmoothBins, zSmoothDict, blindsDict
 
-    def getMulti(self,chrom,start,end):
+    def getMulti(self, chrom, start, end):
         totalVals = []
-        for mark in range(start,end+1):
+        for mark in range(start, end + 1):
             binVals = []
             if len(self.reference[str(chrom)]) > mark:
                 for lookUp in self.reference[str(chrom)][mark]:
                     if len(self.sample[lookUp[0]]) > lookUp[1] and not self.sample[lookUp[0]][lookUp[1]] == 0:
                         binVals.append(self.sample[lookUp[0]][lookUp[1]])
                 if len(self.reference[str(chrom)][mark]) > 0:
-                    binAvg = self.sample[str(chrom)][mark]/numpy.average(binVals)
+                    binAvg = self.sample[str(chrom)][mark] / numpy.average(binVals)
                     totalVals.append(binAvg)
         totalAvg = numpy.average(totalVals)
         return totalAvg
 
-
-    def testBins(self, markedBins,maxBinSkip,minBinLength):
+    def testBins(self, markedBins, maxBinSkip, minBinLength):
         found = 0
         results = []
         count = 0
         prevChrom = 1
-        curStrand = [[-1,-1,-1]]
+        curStrand = [[-1, -1, -1]]
 
         def finalize(curStrand):
             results.append(curStrand)
@@ -263,7 +258,7 @@ class WiseCondorTest(object):
         results.pop(0)
         filtered = 0
         kept = []
-    
+
         if self.verbose:
             print "\tChange\tMulti\tZ-Score\tSize\tPosition"
         for result in results:
@@ -278,14 +273,14 @@ class WiseCondorTest(object):
                 if zAverage > 0:
                     variation = '+'
 
-                multitest = self.getMulti(chrom,startBin,endBin)
+                multitest = self.getMulti(chrom, startBin, endBin)
 
                 if self.verbose:
                     print '\t' + variation + '\t' + str(multitest)[:5] + \
-                        '\t' + str(zAverage)[:5] + '\t' + str((endBin-startBin + 1)*binSize/1000000) + \
-                        'Mb\tchr' + str(chrom) + ':' + str(startBin*binSize) + '-' + str((endBin+1)*binSize)
+                          '\t' + str(zAverage)[:5] + '\t' + str((endBin - startBin + 1) * binSize / 1000000) + \
+                          'Mb\tchr' + str(chrom) + ':' + str(startBin * binSize) + '-' + str((endBin + 1) * binSize)
 
-                kept.append([chrom,startBin,endBin,variation,multitest,zAverage])
+                kept.append([chrom, startBin, endBin, variation, multitest, zAverage])
             else:
                 filtered += 1
         if self.verbose:
@@ -293,10 +288,10 @@ class WiseCondorTest(object):
 
         return kept
 
-    def testTrisomyAlt(self,kept):
-    
+    def testTrisomyAlt(self, kept):
+
         resultList = []
-        for chrom in range(1,23):
+        for chrom in range(1, 23):
             tempKept = []
             for val in kept:
                 if val[0] == str(chrom):
@@ -304,7 +299,7 @@ class WiseCondorTest(object):
 
             marked = 0
             for val in tempKept:
-                marked += val[2]-val[1]+1
+                marked += val[2] - val[1] + 1
 
                 for blind in self.blinds[str(chrom)]:
                     if blind >= val[1] and blind <= val[2]:
@@ -317,15 +312,13 @@ class WiseCondorTest(object):
             result = marked / float(len(self.zsmooth[str(chrom)]) - len(self.blinds[str(chrom)]))
             if result > self.trithres:
                 if self.verbose:
-                    print '\tchr' + str(chrom) + ': ' + str(round(result*100)) + '% marked'
+                    print '\tchr' + str(chrom) + ': ' + str(round(result * 100)) + '% marked'
                 call = [i for i in kept if i[0] == str(chrom)][0]
-                if call[3] == '-': # report deleted as well
-                    result = result*(-1)
-                resultList.append([str(chrom), round(result*100)])
+                if call[3] == '-':  # report deleted as well
+                    result = result * (-1)
+                resultList.append([str(chrom), round(result * 100)])
 
         return resultList
-
-
 
     def TrisomyStoufferDirect(self, zScoresDict):
         """
@@ -339,16 +332,14 @@ class WiseCondorTest(object):
             zscores = zScoresDict[chromosome][~numpy.isnan(zScoresDict[chromosome])]
             zscores.sort()
 
-            behead = int( 0.05 * len(zscores) )
+            behead = int(0.05 * len(zscores))
             behead = behead and 1 or behead
             selected_zscores = zscores[behead:-behead]
-            self.dStouffDirect[ chromosome ] = (numpy.sum(selected_zscores)/numpy.sqrt(len(selected_zscores)))
+            self.dStouffDirect[chromosome] = (numpy.sum(selected_zscores) / numpy.sqrt(len(selected_zscores)))
 
-            if self.verbose and abs( self.dStouffDirect[chromosome] ) > self.STOUFFER_CUTOFF:
-                print "\tChr{}\t{:0.12f}".format( chromosome, self.dStouffDirect[chromosome] )
+            if self.verbose and abs(self.dStouffDirect[chromosome]) > self.STOUFFER_CUTOFF:
+                print "\tChr{}\t{:0.12f}".format(chromosome, self.dStouffDirect[chromosome])
         return self.dStouffDirect
-
-
 
 
 # --- MAIN ---
@@ -359,41 +350,41 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='WISECONDOR \
         (WIthin-SamplE COpy Number aberration DetectOR): \
         Detect fetal trisomies and smaller CNV\'s in a maternal plasma sample',
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument('sample', type=str,
-                       help='sample to be tested (pickled)')
+                        help='sample to be tested (pickled)')
 
     parser.add_argument('reference', type=str,
-                       help='reference table used for within sample comparison')
+                        help='reference table used for within sample comparison')
     parser.add_argument('outfile', type=str,
-                       help='output pickled results to this file for plotting later on')
+                        help='output pickled results to this file for plotting later on')
 
     parser.add_argument('-maxrounds', default=5, type=int,
-                       help='maximum amount of rounds used to test for aberrations')
+                        help='maximum amount of rounds used to test for aberrations')
     parser.add_argument('-binsize', default=1000000, type=int,
-                       help='binsize used for samples (equals arg used in reference)')
+                        help='binsize used for samples (equals arg used in reference)')
     parser.add_argument('-refminbin', default=10, type=int,
-                       help='minimum number of reference bins, ignore target bin if not there are less reference bins available')
+                        help='minimum number of reference bins, ignore target bin if not there are less reference bins available')
     parser.add_argument('-refmaxbin', default=100, type=int,
-                       help='maximum number of reference bins, ignore any reference bin after')
+                        help='maximum number of reference bins, ignore any reference bin after')
 
     parser.add_argument('-refmaxval', default=1000000, type=int,
-                       help='start cutoff value for determining good quality reference bins')
+                        help='start cutoff value for determining good quality reference bins')
     parser.add_argument('-refmaxrep', default=3, type=int,
-                       help='amount of improval rounds for determining good quality reference bins, use 0 to ignore this and just take -refmaxval as cutoff')
+                        help='amount of improval rounds for determining good quality reference bins, use 0 to ignore this and just take -refmaxval as cutoff')
 
     parser.add_argument('-smaxskip', default=2, type=int,
-                       help='single-bin-testing: ignore gaps of specified amount of bins')
+                        help='single-bin-testing: ignore gaps of specified amount of bins')
     parser.add_argument('-sminbins', default=10, type=int,
-                       help='single-bin-testing: ignore aberrations smaller than specified amount of bins')
+                        help='single-bin-testing: ignore aberrations smaller than specified amount of bins')
 
     parser.add_argument('-window', default=5, type=int,
-                       help='window size for sliding window approach, number of bins is considered in each direction (i.e. using 3 results in using 3+1+3=7 bins per call)')
+                        help='window size for sliding window approach, number of bins is considered in each direction (i.e. using 3 results in using 3+1+3=7 bins per call)')
     parser.add_argument('-wmaxskip', default=1, type=int,
-                       help='window-testing: ignore gaps of specified amount of bins')
+                        help='window-testing: ignore gaps of specified amount of bins')
     parser.add_argument('-wminbins', default=10, type=int,
-                       help='window-testing: ignore aberrations smaller than specified amount of bins')
+                        help='window-testing: ignore aberrations smaller than specified amount of bins')
 
     parser.add_argument('-trithres', default=0.5, type=float,
                         help='threshold value for determining aneuploidy')
@@ -410,7 +401,7 @@ if __name__ == "__main__":
         argsKeys = argsDict.keys()
         argsKeys.sort()
         for arg in argsKeys:
-            logger.info('\t'.join([arg,str(argsDict[arg])]))
+            logger.info('\t'.join([arg, str(argsDict[arg])]))
 
     # instantiate object
     options = {
@@ -420,11 +411,11 @@ if __name__ == "__main__":
         'refminbin': args.refminbin,
         'refmaxbin': args.refmaxbin,
         'maxrounds': args.maxrounds,
-        
+
         # Single bin testing
         'smaxskip': args.smaxskip,
         'sminbins': args.sminbins,
-        
+
         # Window bin testing
         'window': args.window,
         'wmaxskip': args.wmaxskip,
@@ -435,9 +426,8 @@ if __name__ == "__main__":
 
         'verbose': args.verbose,
     }
-    
-    wc = WiseCondorTest( **options )
 
+    wc = WiseCondorTest(**options)
 
     if args.verbose:
         print '\n# Processing:'
@@ -445,8 +435,7 @@ if __name__ == "__main__":
         print 'Loading:\tReference Table\t' + args.reference
     sample = wc.sample
     lookUpTable = wc.reference
-    binSize     = int(args.binsize)
-
+    binSize = int(args.binsize)
 
     if args.verbose:
         print '\nDetermining reference cutoffs'
@@ -455,18 +444,18 @@ if __name__ == "__main__":
     if args.verbose:
         print '\tCutoff determined:\t' + str(maxDist)
         print
-    avgDev = wc.checkAverageDeviation( maxDist )
+    avgDev = wc.checkAverageDeviation(maxDist)
 
-    markedBins,zScoresDict,markedSmoothBins,zSmoothDict,blindsDict = wc.markBins(maxDist)
+    markedBins, zScoresDict, markedSmoothBins, zSmoothDict, blindsDict = wc.markBins(maxDist)
 
     if args.verbose:
         print '\nUncallable bins:\t' + str(sum([len(blindsDict[key]) for key in blindsDict.keys()]) \
-            /float(sum([len(sample[key]) for key in sample.keys()]))*100)[:5] + '%'
+                                           / float(sum([len(sample[key]) for key in sample.keys()])) * 100)[:5] + '%'
 
     if args.verbose:
         print '\n\n# Results:'
         print '\nSingle bin, bin test:'
-    kept = wc.testBins(markedBins,args.smaxskip,args.sminbins)
+    kept = wc.testBins(markedBins, args.smaxskip, args.sminbins)
 
     if args.verbose:
         print '\nSingle bin, aneuploidy test:'
@@ -476,10 +465,9 @@ if __name__ == "__main__":
         if len(singlebin_test) == 0:
             print 'Nothing found'
 
-
     if args.verbose:
         print '\nWindowed, bin test:'
-    kept2 = wc.testBins(markedSmoothBins,args.wmaxskip,args.wminbins)
+    kept2 = wc.testBins(markedSmoothBins, args.wmaxskip, args.wminbins)
 
     if args.verbose:
         print '\nWindowed, aneuploidy test:'
@@ -488,44 +476,42 @@ if __name__ == "__main__":
     if args.verbose:
         if len(windowed_test) == 0:
             print 'Nothing found'
-    
+
     if args.verbose:
         print '\nChromosome wide, aneuploidy test:'
     wc.TrisomyStoufferDirect(zScoresDict)
-    
 
     if args.verbose:
         print '\n\n# Script information:\n'
         print '\nComputing additional data for plots'
     wastedBins = dict()
-    for chrom in range(1,23):
+    for chrom in range(1, 23):
         wastedBins[str(chrom)] = []
-        for bin in range(len(sample[str(chrom)])-1):
-            wastedBins[str(chrom)].append(len(wc.getReference(str(chrom),bin,[],1)) <= 3)
+        for bin in range(len(sample[str(chrom)]) - 1):
+            wastedBins[str(chrom)].append(len(wc.getReference(str(chrom), bin, [], 1)) <= 3)
 
     if args.verbose:
         print '\nStoring data for creating plots'
-    outputData=dict()
-    outputData['sample']=sample
+    outputData = dict()
+    outputData['sample'] = sample
     outputData['runtime_arguments'] = args
     outputData['avgDev'] = avgDev
 
+    outputData['markedBins'] = markedBins
 
-    outputData['markedBins']=markedBins
-
-    outputData['kept']=kept
+    outputData['kept'] = kept
     outputData['singlebin_test'] = singlebin_test
 
-    outputData['kept2']=kept2
+    outputData['kept2'] = kept2
     outputData['windowed_test'] = windowed_test
 
     outputData['stouff_direct'] = wc.dStouffDirect
 
-    outputData['zScoresDict']=zScoresDict
-    outputData['zSmoothDict']=zSmoothDict
-    outputData['blindsDict']=blindsDict
-    outputData['wastedBins']=wastedBins
-    pickle.dump(outputData,open(args.outfile,'wb'))
+    outputData['zScoresDict'] = zScoresDict
+    outputData['zSmoothDict'] = zSmoothDict
+    outputData['blindsDict'] = blindsDict
+    outputData['wastedBins'] = wastedBins
+    pickle.dump(outputData, open(args.outfile, 'wb'))
 
     if args.verbose:
         print '\n# Finished'

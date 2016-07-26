@@ -27,8 +27,9 @@ import sys
 import pickle
 import argparse
 
-parser = argparse.ArgumentParser(description='Convert any stream of reads to a pickle file for WISECONDOR, defaults are set for the SAM format',
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+parser = argparse.ArgumentParser(
+    description='Convert any stream of reads to a pickle file for WISECONDOR, defaults are set for the SAM format',
+    formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
 parser.add_argument('outfile', type=str,
                     help='reference table output, used for sample testing (pickle)')
@@ -46,34 +47,36 @@ parser.add_argument('-colpos', type=int, default=3,
 
 args = parser.parse_args()
 
-binsize        = args.binsize
-minShift     = args.retdist
-threshold    = args.retthres
-chrColumn    = args.colchr
-startColumn    = args.colpos
+binsize = args.binsize
+minShift = args.retdist
+threshold = args.retthres
+chrColumn = args.colchr
+startColumn = args.colpos
 
 # Prepare the list of chromosomes
 chromosomes = dict()
-for chromosome in range(1,23):
+for chromosome in range(1, 23):
     chromosomes[str(chromosome)] = [0]
 chromosomes['X'] = [0]
 chromosomes['Y'] = [0]
+
 
 # Flush the current stack of reads
 def flush(readBuff):
     global chromosomes
     stairSize = len(readBuff)
-    if stairSize <= threshold or threshold < 0:    
+    if stairSize <= threshold or threshold < 0:
         for read in readBuff:
             chromosome = read[0]
-            if chromosome[:3].lower() == 'chr': 
+            if chromosome[:3].lower() == 'chr':
                 chromosome = chromosome[3:]
-            location    = read[1]
-            bin         = location/binsize
+            location = read[1]
+            bin = location / binsize
             if (chromosome in chromosomes):
                 while len(chromosomes[chromosome]) <= bin:
                     chromosomes[chromosome].append(0.)
                 chromosomes[chromosome][bin] += 1
+
 
 prevWords = ['0'] * 10
 readBuff = []
@@ -81,13 +84,14 @@ for line in sys.stdin:
     curWords = line.split()
 
     # Not ndup, flush and start new stair
-    if not((curWords[chrColumn] == prevWords[chrColumn]) and (minShift >= (int(curWords[startColumn])-int(prevWords[startColumn])))):
+    if not ((curWords[chrColumn] == prevWords[chrColumn]) and (
+        minShift >= (int(curWords[startColumn]) - int(prevWords[startColumn])))):
         flush(readBuff)
         readBuff = []
 
     # Normal ndups will be appended here
-    readBuff.append([curWords[chrColumn],int(curWords[startColumn])])
-    
+    readBuff.append([curWords[chrColumn], int(curWords[startColumn])])
+
     prevWords = curWords
     prevLine = line
 
@@ -95,4 +99,4 @@ for line in sys.stdin:
 flush(readBuff)
 
 # Dump converted data to a file
-pickle.dump(chromosomes,open(args.outfile,'wb'))
+pickle.dump(chromosomes, open(args.outfile, 'wb'))
