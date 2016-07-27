@@ -3,3 +3,5 @@ matplotlib
 biopython
 statsmodels
 sklearn
+pysam
+pyfaidx
