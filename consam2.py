@@ -1,39 +1,23 @@
 import argparse
 import pysam
 
+from utils import get_bins  # TODO : make package so we can do relative import
 
-def get_bins(chromosome_length, binsize):
+
+def reads_per_bin(bam_reader, chromosome, bin):
     """
-    Get list of 2-tuples of start and end positions of bins for a given chromosome
-    :param chromosome_length: integer
-    :param binsize: integer
-    :return: list of 2-tuples of (start, end). Start = 0-based
-    """
-
-    starts = list(range(0, chromosome_length, binsize))
-    ends = []
-    for s in starts:
-        if s + binsize < chromosome_length:
-            ends.append(s+binsize)
-        else:
-            ends.append(chromosome_length)
-    return [(s, e) for s, e in zip(starts, ends)]
-
-
-def bin_to_bed(bam_reader, chromosome, bin):
-    """
-    Create bed line from bin
+    Number of reads per bin
     :param bam_reader: an instance of pysam.AlignmentFile
     :param chromosome: chromosome name
     :param bin: 2-tuple of (start, end)
-    :return: bedline of chr\tstart\tend\tnreads
+    :return: integer
     """
     try:
         reads = bam_reader.count(chromosome, bin[0], bin[1])
     except ValueError:
         reads = 0
 
-    return "{0}\t{1}\t{2}\t{3}".format(chromosome, bin[0], bin[1], reads)
+    return reads
 
 
 def get_chromosomes_from_header(header):
@@ -65,7 +49,8 @@ if __name__ == "__main__":
     with open(args.output, "wb") as ohandle:
         for ch, ln in chromosomes:
             for bin in get_bins(ln, args.binsize):
-                bed = bin_to_bed(samfile, ch, bin)
+                val = reads_per_bin(samfile, ch, bin)
+                bed = "{0}\t{1}\t{2}\t{3}".format(ch, bin[0], bin[1], val)
                 ohandle.write(bed + "\n")
 
 
