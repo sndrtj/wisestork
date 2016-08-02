@@ -9,11 +9,11 @@ def reads_per_bin(bam_reader, chromosome, bin):
     Number of reads per bin
     :param bam_reader: an instance of pysam.AlignmentFile
     :param chromosome: chromosome name
-    :param bin: 2-tuple of (start, end)
+    :param bin: Bin namedtuple
     :return: integer
     """
     try:
-        reads = bam_reader.count(chromosome, bin[0], bin[1])
+        reads = bam_reader.count(chromosome, bin.start, bin.end)
     except ValueError:
         reads = 0
 
@@ -50,7 +50,7 @@ if __name__ == "__main__":
         for ch, ln in chromosomes:
             for bin in get_bins(ln, args.binsize):
                 val = reads_per_bin(samfile, ch, bin)
-                bed = "{0}\t{1}\t{2}\t{3}".format(ch, bin[0], bin[1], val)
+                bed = "{0}\t{1}\t{2}\t{3}".format(ch, bin.start, bin.end, val)
                 ohandle.write(bed + "\n")
 
 
