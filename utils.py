@@ -9,6 +9,17 @@ class BedLine(namedtuple("BedLine", ["chromosome", "start", "end", "value"])):
     def __str__(self):
         return "{0}\t{1}\t{2}\t{3}".format(self.chromosome, self.start, self.end, self.value)
 
+    def __eq__(self, other):
+        return self.chromosome == other.chromosome and self.start == other.start and self.end == other.end
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    @classmethod
+    def fromline(cls, str):
+        contents = str.split("\t")
+        return cls(contents[0], int(contents[1]), int(contents[2]), float(contents[3]))
+
 
 def attempt_integer(value):
     """

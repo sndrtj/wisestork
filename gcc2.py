@@ -6,7 +6,7 @@ import numpy as np
 from pyfaidx import Fasta
 
 from countgc2 import get_gc_for_bin, get_n_per_bin
-from utils import BedLine, Bin
+from utils import BedLine, Bin, attempt_integer
 
 
 def filter_bin(value, chromosome, bin, ref_fasta, frac_n, frac_r):
@@ -84,12 +84,12 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     fasta = Fasta(args.reference)
-    bed_lines = [BedLine(*x.split("\t")) for x in open(args.input)]
+    bed_lines = [BedLine(*map(attempt_integer, x.split("\t"))) for x in open(args.input)]
     corrected = correct(bed_lines, fasta, args.frac_n, args.frac_r, args.iter, args.frac_lowess)
 
     with open(args.output, "wb") as ohandle:
         for line in corrected:
-            ohandle.write(line + "\n")
+            ohandle.write(str(line) + "\n")
 
 
 
