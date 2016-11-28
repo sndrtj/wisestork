@@ -38,28 +38,32 @@ def get_chromosomes_from_header(header):
     return [(x['SN'], x['LN']) for x in header['SQ']]
 
 
-if __name__ == "__main__":
-    desc = """
-    This script takes a BAM file, and calculates the number of reads per bin.
-    It will output a BED file (with 0-based positions) of regions and associated reads/bin.
-
-    Your BAM file must be indexed with tabix, and must contain chromosome names and lengths in the header.
+def get_chromosomes_from_fasta(fa):
     """
-    parser = argparse.ArgumentParser(description=desc)
-    parser.add_argument("-I", "--input", type=str, required=True, help="Input BAM file")
-    parser.add_argument("-O", "--output", type=str, required=True, help="Output BED file")
+    Get chromosome names from fasta file
+    :param fa: instance of pyfaidx.Fasta
+    :return: list of tuples of (chromosome names, chromosome_lenght)
+    """
+    # TODO
+    pass
 
-    parser.add_argument("-b", "--binsize", type=int, default=int(1e6), help="Binsize")
 
-    args = parser.parse_args()
-
-    samfile = pysam.AlignmentFile(args.input)
+def count(input, output, binsize, reference):
+    """
+    Main function for counting reads per bin
+    :param input: Path to input BAM
+    :param output: path to output BED
+    :param binsize: binsize
+    :param reference: path to reference fasta
+    """
+    # TODO: check whether chromosome names in reference match those in bam file
+    samfile = pysam.AlignmentFile(input)
     chromosomes = get_chromosomes_from_header(samfile.header)
-    with open(args.output, "wb") as ohandle:
+    with open(output, "wb") as ohandle:
         for ch, ln in chromosomes:
-            for bin in get_bins(ln, args.binsize):
+            for bin in get_bins(ln, binsize):
                 val = reads_per_bin(samfile, ch, bin)
                 bed = "{0}\t{1}\t{2}\t{3}".format(ch, bin.start, bin.end, val)
-                ohandle.write(bed + "\n")
+                ohandle.write(bytes(bed + "\n"))
 
 

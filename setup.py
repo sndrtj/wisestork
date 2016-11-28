@@ -18,7 +18,7 @@ with open(readme_file) as desc_handle:
 
 
 setup(
-    name="Wiseguy",
+    name="wiseguy",
     version=__version__,
     description="",
     author="Sander Bollen",
@@ -29,7 +29,7 @@ setup(
         "statsmodels",
         "sklearn",
         "pysam",
-        "pyfaidx"
+        "pyfaidx",
         "biopython",
         "click"
     ],
