@@ -1,7 +1,16 @@
+"""
+wiseguy.newref
+~~~~~~~~~~~~~~
+
+:copyright: (c) 2016 Sander Bollen
+:copyright: (c) Leiden University Medical Center
+:license: GPLv3
+"""
+
 import argparse
 import numpy as np
 
-from utils import BedLine, get_bins
+from .utils import BedLine, get_bins
 from pyfaidx import Fasta
 
 

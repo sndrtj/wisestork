@@ -1,8 +1,17 @@
+"""
+wiseguy.gc
+~~~~~~~~~~
+
+:copyright: (c) 2016 Sander Bollen
+:copyright: (c) 2016 Leiden University Medical Center
+:license: GPLv3
+"""
+
 import argparse
 from Bio.SeqUtils import GC
 from pyfaidx import Fasta
 
-from utils import get_bins  # TODO : make package so we can do relative import
+from .utils import get_bins
 
 
 def get_gc_for_bin(fasta, chromosome, bin):

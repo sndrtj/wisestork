@@ -1,3 +1,13 @@
+"""
+wiseguy.utils
+~~~~~~~~~~~~~
+
+:copyright: (c) 2016 Sander Bollen
+:copyright: (c) 2016 Leiden University Medical Center
+:license: GPLv3
+"""
+
+
 from collections import namedtuple
 
 Bin = namedtuple("Bin", ["start", "end"])

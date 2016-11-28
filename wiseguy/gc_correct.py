@@ -1,12 +1,19 @@
-from math import *
-import sys
+"""
+wiseguy.gc_correct
+
+:copyright: (c) 2016 Sander Bollen
+:copyright: (c) 2016 Leiden Univeristy Medical Center
+:license: GPLv3
+"""
+
 import argparse
-import statsmodels.nonparametric.smoothers_lowess as statlow
 import numpy as np
+
+import statsmodels.nonparametric.smoothers_lowess as statlow
 from pyfaidx import Fasta
 
-from countgc2 import get_gc_for_bin, get_n_per_bin
-from utils import BedLine, Bin, attempt_integer
+from .utils import BedLine, Bin, attempt_integer
+from .gc import get_gc_for_bin, get_n_per_bin
 
 
 def filter_bin(value, chromosome, bin, ref_fasta, frac_n, frac_r):

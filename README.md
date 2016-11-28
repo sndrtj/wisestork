@@ -1,63 +1,76 @@
-WISECONDOR (WIthin-SamplE COpy Number aberration DetectOR):
-===
-Detect fetal trisomies and smaller CNV's in a maternal plasma sample using whole-genome data.
+Wiseguy
+=======
+This is a complete re-implementation of the original Wisecondor program.
+Its original purpose was to detect trisomies and smaller CNVs in 
+maternal plasma samples using low-coverage WGS.
+ 
+Wiseguy adds practical support for small bin sizes,
+and is intended to be useful on regular WGS and Exome sequencing as well
+
+For a full overview of differences with the original Wisecondor, 
+see section Differences.
+
+## Installation
+
+The following system dependencies are required
+
+* Python 2.7+ or 3.4+
+
+Furthermore, the following python packages are required:
+
+* numpy
+* matplotlib
+* biopython
+* statsmodels
+* sklearn
+* pysam
+* pyfaidx
+* click
+
+It is recommended you use a virtualenv. 
+
+To install wiseguy, create a virtualenv, install the python 
+requirements using `pip install -r requirements.txt` and then run
+`python setup.py develop`
 
 
+## Input 
 
-1. REQUIREMENTS
----
+Wiseguy takes BAM files as input. These BAM files _must_ be indexed.
+ 
+Additionally, you must provide a reference Fasta file, which should
+likewise be indexed with `samtools faidx <fasta>`.  
 
-WISECONDOR was developed and tested using Python2.7. Using any other version may cause errors or faulty results. The working version is tested using SAMTOOLS on .bam files created by BWA. Original work was based on SOAP2 files, and any SOAP2 mapped input stream should work as well although it requires additional arguments when using consam.py
+## Running
 
-Using Ubuntu, this should obtain the required packages:
+_TODO_
 
-	sudo apt-get install python-numpy python-matplotlib python-biopython
+## Differences
 
-For any other unix based system, if easy_install is installed, you should be able to install all of these using this command in a terminal:
-
-	sudo easy_install numpy matplotlib biopython
-
-
-
-2. PREPARING FOR TESTING
----
-
-To start testing for aberrations, WISECONDOR needs to learn how genomic regions behave when compared to eachother. To do so, reference data should be prepared in the same way as the test sample data later on, using the same genomic reference, the same GC-correction, etc.
-
-Settings we used for external tools:
-
-	bwa aln -n 0 -k 0
-	bwa samse -n -1
-	picardtools sortsam SO=coordinate VALIDATION_STRINGENCY=LENIENT CREATE_INDEX=true
-	samtools rmdup -s $INFILE - | samtools view - -q 1
-
-To create a GC-count table for the genomic reference you use, use countgc.py:
-
-	python countgc.py path/to/reference.fa ./ref/gccount
-
-Applying the GC-correction should be done for any sample file you have.
-
-	python ./gcc.py ./in/sample.pickle ./ref/gccount ./in/sample.gcc
-
-Then, all reference files should be fed into the newref.py script. The current implementation used all samples in a single folder, so after applying all your corrections to your data, move the reference samples into a separate folder and start the reference-build script:
-
-	python newref.py ./in/refs/ ./ref/reference
-
-
-
-3. RUNNING TESTS
----
-
-An example pipeline implementation can be found in pipeline.sh. This script will look for .pickle files in ./in/ and write output to ./out/. Additionally, details showing how to prepare your data can be found in this script but are not carried out as these require BWA and SAMTOOLS to be set up correctly.
-To improve your results you probably want to change a few parameters. Most of the values used in WISECONDOR can be altered using arguments. To find out what arguments can be passed into any script, try running it with -h as argument, for example:
-
-	python test.py -h
-
-To create plots, use the file created by test.py as input for plot.py. This script turns the prepared data into a visualization, which can be customized or replaced to accommodate for personal preferences without the need to make changes to the original algorithm.
-
-
-
-4. PITFALLS
----
-
-Do not use any of the example data for your own tests, if available. Every reference file, laboratory and sequencing machine has its own effect on how read depth per bin behaves. Any results obtained by combining files from different origins are unreliable.
+There are several important differences between this re-implementation
+and the original wisecondor. 
+ 
+* This re-implementation is organized as a regular python package, 
+  while exposing several command-line tools. 
+* Python 3 support
+* All command-line tools now have UNIX-style argument parsing
+* Generating reference sets for small bin sizes is now possible in 
+  much less time. 
+* Pickle files are no longer used. The output format is now regular BED,
+  with a possible additional column. This means results can be used by 
+  common downstream tools like Bedtools.
+* The countgc step is now redundant. Its functionality is now integrated
+  in the gcc step. 
+* The reference bin selection method was modified. The
+  original wisecondor calculated differences for every bin against every
+  bin of every sample, and then repeated this calculation for every 
+  chromosome. As this is an exponential operation, this made 
+  reference bin selection prohibitively slow and memory-consuming for 
+  smaller bin size. In stead of calculating differences, the new method
+  applies a method (e.g. median) over the same bins of all samples, 
+  and then _sorts_ the resulting list of bins. Similar bins can be
+  selected using regular list slicing. This means the time complexity 
+  of creating a new reference set is now just loglinear. Additional 
+  filterings were left the same. 
+* Use of the `statsmodels` lowess function, rather than biopython's. 
+  This results in a significant speed-up of the gc correction.

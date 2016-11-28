@@ -1,7 +1,16 @@
+"""
+wiseguy.count
+~~~~~~~~~~~~~~
+
+:copyright: (c) 2016 Sander Bollen
+:copyright: (c) 2016 Leiden University Medical Center
+:license: GPLv3
+"""
+
 import argparse
 import pysam
 
-from utils import get_bins  # TODO : make package so we can do relative import
+from .utils import get_bins
 
 
 def reads_per_bin(bam_reader, chromosome, bin):

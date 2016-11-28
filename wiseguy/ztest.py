@@ -1,10 +1,19 @@
+"""
+wiseguy.ztest
+~~~~~~~~~~~~~
+
+:copyright: (c) 2016 Sander Bollen
+:copyright: (c) 2016 Leiden University Medical Center
+:license: GPLv3
+"""
+
 import argparse
 import gzip
 
 import numpy as np
 import pysam
 
-from utils import BedLine
+from .utils import BedLine
 
 
 def get_refbins_from_db(tbx_handle, bed_line):
@@ -30,6 +39,7 @@ def get_z_score(bin, reference_bins):
     :param bin: bin
     :param reference_bins: reference bins
     :return: float
+    :copyright: (c) 2013 Roy Straver
     """
     if len(reference_bins) == 0:
         return np.nan
@@ -55,7 +65,7 @@ if __name__ == "__main__":
     tbx = pysam.Tabixfile(args.input)
     ohandle = open(args.output, "w")
     for i, r in enumerate(ihandle):
-        print i
+        print(i)
         tmp = BedLine.fromline(r)
         lines = get_refbins_from_db(db_handle, tmp)
         reference_bins = []
