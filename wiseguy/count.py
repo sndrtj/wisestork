@@ -64,6 +64,6 @@ def count(input, output, binsize, reference):
             for bin in get_bins(ln, binsize):
                 val = reads_per_bin(samfile, ch, bin)
                 bed = "{0}\t{1}\t{2}\t{3}".format(ch, bin.start, bin.end, val)
-                ohandle.write(bytes(bed + "\n"))
+                ohandle.write(bytes(bed + "\n", 'utf-8'))
 
 

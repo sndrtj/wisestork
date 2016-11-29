@@ -12,10 +12,11 @@ from functools import wraps
 
 from . import __version__
 from .count import count
+from .gc_correct import gc_correct
 
 shared_options = [
-    click.option("--binsize", "-B", type=click.IntRange(0, None), required=True, default=50000,
-                 help="Bin size to use"),
+    click.option("--binsize", "-B", type=click.IntRange(0, None), default=50000,
+                 help="Bin size to use. Default = 50000"),
     click.option("--reference", "-R", type=click.Path(exists=True), required=True,
                  help="Path to reference fasta"),
     click.version_option(version=__version__)
@@ -39,7 +40,7 @@ def generic_option(options):
 @click.command(short_help="Count coverages")
 @generic_option(shared_options)
 @click.option("--output", "-O", type=click.Path(), required=True, help="Path to output BED file")
-@click.option("--input", "-I", type=click.Path(), required=True, help="Path to input BAM file")
+@click.option("--input", "-I", type=click.Path(exists=True), required=True, help="Path to input BAM file")
 def count_cli(**kwargs):
     """
     Take a BAM file, and calculate the number of reads per bin.
@@ -52,15 +53,36 @@ def count_cli(**kwargs):
     """
     input = kwargs.get("input", None)
     output = kwargs.get("output", None)
-    binsize = kwargs.get("binsize", None)
+    binsize = kwargs.get("binsize", 50000)
     reference = kwargs.get("reference", None)
     count(input=input, output=output, binsize=binsize, reference=reference)
 
 
 @click.command(short_help="GC correct")
 @generic_option(shared_options)
+@click.option("--output", "-O", type=click.Path(), required=True, help="Path to output BED file")
+@click.option("--input", "-I", type=click.Path(exists=True), required=True, help="Path to input BED file")
+@click.option("--frac-n", "-n", type=click.FLOAT, default=0.1, help="Maximum fraction of N-bases per bin. "
+                                                                    "Default = 0.1")
+@click.option("--frac-r", "-r", type=click.FLOAT, default=0.0001, help="Minimum fraction of reads per bin. "
+                                                                       "Default = 0.0001")
+@click.option("--iter", "-t", type=click.INT, default=3, help="Number of iterations for LOWESS function. Default = 3")
+@click.option("--frac-lowess", "-l", type=click.FLOAT, default=0.1, help="Fraction of data to use for LOWESS function. "
+                                                                         "Default = 0.1")
 def gcc_cli(**kwargs):
-    pass
+    """
+    GC-correct a BED file containing counts per region
+    """
+    input_path = kwargs.get("input", None)
+    output = kwargs.get("output", None)
+    reference = kwargs.get("reference", None)
+    frac_n = kwargs.get("frac_n", 0.1)
+    frac_r = kwargs.get("frac_r", 0.0001)
+    iter = kwargs.get("iter", 3)
+    frac_lowess = kwargs.get("frac_lowess", 0.1)
+    gc_correct(input=input_path, output=output, reference=reference,
+               frac_r=frac_r, frac_n=frac_n, iter=iter, frac_lowess=frac_lowess)
+
 
 @click.command(short_help="Calculte Z-scores")
 @generic_option(shared_options)

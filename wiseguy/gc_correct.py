@@ -74,29 +74,14 @@ def correct(inputs, fasta, frac_n=0.1, frac_r=0.0001, lowess_iter=3, lowess_frac
     return corrected_lines
 
 
-if __name__ == "__main__":
-    desc = """
-    Apply GC correction to sample BED files.
-    """
+def gc_correct(input, output, reference, frac_n, frac_r, iter, frac_lowess):
+    fasta = Fasta(reference)
+    bed_lines = [BedLine(*map(attempt_integer, x.split("\t"))) for x in open(input)]
+    corrected = correct(bed_lines, fasta, frac_n, frac_r, iter, frac_lowess)
 
-    parser = argparse.ArgumentParser(description=desc)
-    parser.add_argument("-I", "--input", type=str, required=True, help="Input BED file (produced by consam2.py)")
-    parser.add_argument("-R", "--reference", type=str, required=True, help="Reference fasta (must be indexed)")
-    parser.add_argument("-O", "--output", type=str, required=True, help="Path to output file")
-
-    parser.add_argument("-n", "--frac-n", type=float, default=0.1, help="Maximum fraction of N-bases per bin")
-    parser.add_argument("-r", "--frac-r", type=float, default=0.0001, help="Minimum fraction of reads per bin")
-    parser.add_argument("-t", "--iter", type=int, default=3, help="Number of iterations for LOWESS function")
-    parser.add_argument("-l", "--frac-lowess", type=float, default=0.1, help="Fraction of data to use for LOWESS function")
-
-    args = parser.parse_args()
-    fasta = Fasta(args.reference)
-    bed_lines = [BedLine(*map(attempt_integer, x.split("\t"))) for x in open(args.input)]
-    corrected = correct(bed_lines, fasta, args.frac_n, args.frac_r, args.iter, args.frac_lowess)
-
-    with open(args.output, "wb") as ohandle:
+    with open(output, "wb") as ohandle:
         for line in corrected:
-            ohandle.write(str(line) + "\n")
+            ohandle.write(bytes(str(line) + "\n", 'utf-8'))
 
 
 

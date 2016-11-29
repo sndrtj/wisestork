@@ -14,7 +14,7 @@ see section Differences.
 
 The following system dependencies are required
 
-* Python 2.7+ or 3.4+
+* Python 3.4+
 
 Furthermore, the following python packages are required:
 
