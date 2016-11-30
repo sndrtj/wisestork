@@ -43,7 +43,82 @@ likewise be indexed with `samtools faidx <fasta>`.
 
 ## Running
 
-_TODO_
+A typical workflow starts with BAM files. Those BAM files _must_ be
+sorted and indexed. 
+
+The first step in a Wiseguy analysis is the `count` step. This 
+generates read counts per bin, and writes this to a BED file. The 
+command to do this, would look like the following:
+
+`wiseguy count -I <input.bam> -R <fasta.fa> -O <out.bed> -B <binszise>`
+ 
+The `-B` flag can be left out: Wiseguy defaults to a binsize of 50kb.
+However, you will likely want a different binsize.
+
+Once you have the count BED file, we have to correct for GC bias. The
+command to do this is:
+
+`wiseguy gc-correct -I <input.bed> -R <fasta.fa> -O <out.gc.bed> -B <binsize>`
+
+For the next step, we need the result bgzipped and tabixed, so you'll 
+have to execute `bgzip <out.gc.bed> && tabix -pbed <out.gc.bed.gz>`
+
+The last step, the `zscore` step, calculates Z-scores for each bin.
+It requires you to have generated a reference dictionary beforehand. 
+The command to create z-scores again looks pretty similar to the 
+earlier two:
+
+`wiseguy zscore -I <input.bed.gz> -R <fasta.fa> -O <out.z.bed> -D <dictionary.bed.gz> -B <binsize>`
+
+### Creating reference dictionaries
+
+The above assumes you have already created a reference dictionary. 
+If this is not the case, you will have to generate this file. 
+
+To create the reference dictionary you will need a set of gc-corrected
+BED files (from `wiseguy gc-correct`) of normal samples, and feed those
+to `wiseguy newref`. The rewref command will then find the nearest
+neighbours of every bin. Later on, in the zscore command, this
+information is used to get a set of "reference bins" from the query
+sample. 
+
+Command to be used:
+
+`wiseguy newref -I <input.gz.bed> -I <input2.gz.bed> [...] -O <out.ref.bed> -R <fasta.fa> -B <binsize>`
+ 
+The output of this _must_ be sorted with bedtools, and then bgzipped
+and tabixed. 
+
+### Usage
+
+```
+Usage: wiseguy [OPTIONS] COMMAND [ARGS]...
+
+  Discover CNVs from BAM files.
+
+  A typical workflow first extracts regions from a BAM file
+  The resulting BED tracks must then be GC-corrected.
+  Using a reference track of region similarity,
+  One can then calculate Z-scores for every region.
+
+  The following sub-commands are supported:
+   - count: count coverage per bin
+   - gc-correct: GC-correct bins
+   - zscore: calculate Z-scores
+   - newref: Generate a new reference dictionary of bin similarities
+
+Options:
+  --version  Show the version and exit.
+  --help     Show this message and exit.
+
+Commands:
+  count       Count coverages
+  gc-correct  GC correct
+  newref      Create new reference
+  zscore      Calculte Z-scores
+```
+
+You can additional help by typing `wiseguy <command> --help`
 
 ## Differences
 
