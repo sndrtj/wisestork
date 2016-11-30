@@ -13,6 +13,7 @@ from functools import wraps
 from . import __version__
 from .count import count
 from .gc_correct import gc_correct
+from .ztest import ztest
 
 shared_options = [
     click.option("--binsize", "-B", type=click.IntRange(0, None), default=50000,
@@ -86,8 +87,28 @@ def gcc_cli(**kwargs):
 
 @click.command(short_help="Calculte Z-scores")
 @generic_option(shared_options)
+@click.option("--input", "-I", type=click.Path(exists=True), required=True, help="Path to input BED file")
+@click.option("--output", "-O", type=click.Path(), required=True, help="Path to output BED file")
+@click.option("--dictionary-file", "-D", type=click.Path(), required=True, help="Path to dictionary BED file")
 def zscore_cli(**kwargs):
-    pass
+    """
+    Calculate Z-scores from GC-corrected BED files.
+
+    \b
+    You must supply a "reference dictionary" BED file
+    containing locations of reference bins.
+    This reference dictionary must be gzipped and
+    indexed with tabix.
+
+    \b
+    Your query BED file should also be gzipped and
+    indexed with tabix
+    """
+    input_path = kwargs.get("input", None)
+    output_path = kwargs.get("output", None)
+    database = kwargs.get("dictionary_file", None)
+    ztest(input_path=input_path, output_path=output_path, database_path=database)
+
 
 @click.command(short_help="Create new reference")
 @generic_option(shared_options)

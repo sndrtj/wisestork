@@ -9,6 +9,7 @@ wiseguy.ztest
 
 import argparse
 import gzip
+import sys
 
 import numpy as np
 import pysam
@@ -52,20 +53,22 @@ def get_z_score(bin, reference_bins):
     return Z
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-I", "--input", type=str, required=True, help="Input bgzipped and tabixxed bedgraph file")
-    parser.add_argument("-D", "--database", type=str, required=True, help="Reference database")
-    parser.add_argument("-O", "--output", type=str, required=True, help="Output file")
-
-    args = parser.parse_args()
-    db_handle = pysam.Tabixfile(args.database)
-
-    ihandle = gzip.open(args.input)
-    tbx = pysam.Tabixfile(args.input)
-    ohandle = open(args.output, "w")
+def ztest(input_path, output_path, database_path, counter_interval=1000):
+    """
+    Calculate z scores from bed file and database bed file
+    :param input_path: query bed file path
+    :param output_path: output bed file path
+    :param database_path: database file path
+    :param counter_interval: Interval for counter updates (default: 1000)
+    :return: -
+    """
+    db_handle = pysam.Tabixfile(database_path)
+    ihandle = gzip.open(input_path)
+    tbx = pysam.Tabixfile(input_path)
+    ohandle = open(output_path, "wb")
     for i, r in enumerate(ihandle):
-        print(i)
+        if i % counter_interval == 0:
+            print("Processed {i} records".format(i=i), file=sys.stderr)
         tmp = BedLine.fromline(r)
         lines = get_refbins_from_db(db_handle, tmp)
         reference_bins = []
@@ -73,8 +76,17 @@ if __name__ == "__main__":
             reference_bins += [BedLine.fromline(x) for x in tbx.fetch(str(line.chromosome), line.start, line.end)]
         z = get_z_score(tmp, reference_bins)
         n = BedLine(tmp.chromosome, tmp.start, tmp.end, z)
-        ohandle.write(str(n) + "\n")
+        ohandle.write(bytes(str(n) + "\n", 'utf-8'))
 
     ohandle.close()
     ihandle.close()
     tbx.close()
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-I", "--input", type=str, required=True, help="Input bgzipped and tabixxed bedgraph file")
+    parser.add_argument("-D", "--database", type=str, required=True, help="Reference database")
+    parser.add_argument("-O", "--output", type=str, required=True, help="Output file")
+
+    args = parser.parse_args()
