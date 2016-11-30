@@ -27,7 +27,7 @@ class BedLine(namedtuple("BedLine", ["chromosome", "start", "end", "value"])):
 
     @classmethod
     def fromline(cls, str):
-        contents = str.split("\t")
+        contents = str.split(b"\t")
         return cls(contents[0], int(contents[1]), int(contents[2]), float(contents[3]))
 
 

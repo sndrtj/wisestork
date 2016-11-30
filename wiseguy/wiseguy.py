@@ -8,11 +8,10 @@ wiseguy.wiseguy
 
 import click
 
-from functools import wraps
-
 from . import __version__
 from .count import count
 from .gc_correct import gc_correct
+from .newref import newref
 from .ztest import ztest
 
 shared_options = [
@@ -112,8 +111,28 @@ def zscore_cli(**kwargs):
 
 @click.command(short_help="Create new reference")
 @generic_option(shared_options)
+@click.option("--input", "-I", type=click.Path(exists=True), required=True, multiple=True, help="Path(s) to input BEDs")
+@click.option("--output", "-O", type=click.Path(), required=True, help="Path to output BED file")
+@click.option("--n-bins", "-n", type=click.INT, default=250, help="Amount of neighbours bins to consider per bin")
 def newref_cli(**kwargs):
-    pass
+    """
+    Create a new reference dictionary BED file.
+
+    \b
+    This tool takes multiple input BED files.
+    For each bin, it will then find a set of neighbour bins
+    that behave most similar to one another.
+
+    \b
+    You must short and then tabix the output after running this tool.
+    """
+    input_path = kwargs.get("input", None)
+    output_path = kwargs.get("output", None)
+    reference_fasta = kwargs.get("reference", None)
+    binsize = kwargs.get("binsize", 50000)
+    n_bins = kwargs.get("n_bins", 250)
+
+    newref(input_paths=input_path, output_path=output_path,reference=reference_fasta, binsize=binsize, n_bins=n_bins)
 
 
 @click.group()

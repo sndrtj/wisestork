@@ -24,13 +24,13 @@ def get_refbins_from_db(tbx_handle, bed_line):
     :param bed_line: BedLine namedtuple
     :return: list of BedLine namedtuples (may be empty)
     """
-    record = [x for x in tbx_handle.fetch(str(bed_line.chromosome), bed_line.start, bed_line.end)][0]
+    record = [x for x in tbx_handle.fetch(bed_line.chromosome.decode(), bed_line.start, bed_line.end)][0]
     rows = [x.replace(",", "\t") for x in record.strip().split("\t")[3].split("|")]
     if rows == [""]:
         return []
     if rows == ['nan']:
         return []
-    bedlines = [BedLine.fromline(x) for x in rows]
+    bedlines = [BedLine.fromline(x.encode()) for x in rows]
     return bedlines
 
 
@@ -73,9 +73,9 @@ def ztest(input_path, output_path, database_path, counter_interval=1000):
         lines = get_refbins_from_db(db_handle, tmp)
         reference_bins = []
         for line in lines:
-            reference_bins += [BedLine.fromline(x) for x in tbx.fetch(str(line.chromosome), line.start, line.end)]
+            reference_bins += [BedLine.fromline(x.encode()) for x in tbx.fetch(line.chromosome.decode(), line.start, line.end)]
         z = get_z_score(tmp, reference_bins)
-        n = BedLine(tmp.chromosome, tmp.start, tmp.end, z)
+        n = BedLine(tmp.chromosome.decode(), tmp.start, tmp.end, z)
         ohandle.write(bytes(str(n) + "\n", 'utf-8'))
 
     ohandle.close()

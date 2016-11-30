@@ -7,7 +7,6 @@ wiseguy.newref
 :license: GPLv3
 """
 
-import argparse
 import numpy as np
 
 from .utils import BedLine, get_bins
@@ -99,7 +98,7 @@ class ReferenceBinGenerator(object):
         elif idx > len(self.__bins) - self.n_bins:
             vals = self.__bins[idx:]
         else:
-            vals = self.__bins[idx-(self.n_bins/2):idx+(self.n_bins/2)]
+            vals = self.__bins[idx-(self.n_bins//2):idx+(self.n_bins//2)]
         return vals
 
     def filter_bins(self, target_bin, bins):
@@ -126,28 +125,17 @@ class ReferenceBinGenerator(object):
         return non_outliers
 
 
-if __name__ == "__main__":
-    desc = """
-    Create a reference database from a set of GC-corrected bedgraph files.
-
-    Your bedgraph file(s) _must_ be sorted in the order of the reference fasta.
-    You should sort the resulting file with bedtools, bgzip and tabix it.
-    E.g.
-    python newref2.py <<arguments>> -O out.bed && bedtools sort -i out.bed | bgzip -c > out.bed.gz && tabix -pbed out.bed.gz
+def newref(input_paths, output_path, reference, binsize, n_bins=250):
     """
-
-    parser = argparse.ArgumentParser(description=desc)
-    parser.add_argument("-I", "--input", help="Input file(s) for reference building", action="append", required=True)
-    parser.add_argument("-O", "--output", help="Output bed-likefile", required=True)
-    parser.add_argument("-R", "--reference", help="Reference fasta (must be indexed)", required=True)
-    parser.add_argument("-b", "--binsize", help="binsize", type=int, default=int(1e6))
-    parser.add_argument("--n-bins", help="Number of reference bins to consider for each bin", type=int, default=250)
-
-    args = parser.parse_args()
-
-    gen = ReferenceBinGenerator(args.input, args.n_bins, args.reference, args.binsize)
-    refs = []
-    ohandle = open(args.output, "w")
+    Create a new reference bed file
+    :param input_paths: paths to gc-corrected BED files
+    :param output_path: path to output bed file
+    :param reference: path to reference Fasta
+    :param binsize: binsize
+    :param n_bins: number of neighbour bins to consider
+    """
+    gen = ReferenceBinGenerator(input_paths, n_bins, reference, binsize)
+    ohandle = open(output_path, "wb")
     for x in gen:
         chrom = x[0].chromosome
         start = x[0].start
@@ -157,4 +145,4 @@ if __name__ == "__main__":
             references = np.nan
 
         t = BedLine(chrom, start, end, references)
-        ohandle.write(str(t) + "\n")
+        ohandle.write(bytes(str(t) + "\n", 'utf-8'))
