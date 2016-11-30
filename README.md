@@ -149,3 +149,12 @@ and the original wisecondor.
   filterings were left the same. 
 * Use of the `statsmodels` lowess function, rather than biopython's. 
   This results in a significant speed-up of the gc correction.
+
+
+## TODO
+
+* Stouffer test, call and plot functions.
+* In-memory option for `zscore`, that should be much faster.
+* Some general speed ups. 
+* Option to supply a BED file with bins, as opposed to generating them
+from the reference sequence.
