@@ -1,6 +1,8 @@
 """
 wiseguy.gc_correct
 
+:copyright: (c) 2013 Roy Straver
+:copyright: (c) VU University Medical Center
 :copyright: (c) 2016 Sander Bollen
 :copyright: (c) 2016 Leiden Univeristy Medical Center
 :license: GPLv3

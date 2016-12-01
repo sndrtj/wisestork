@@ -2,6 +2,8 @@
 wiseguy.ztest
 ~~~~~~~~~~~~~
 
+:copyright: (c) 2013 Roy Straver
+:copyright: (c) VU University Medical Center
 :copyright: (c) 2016 Sander Bollen
 :copyright: (c) 2016 Leiden University Medical Center
 :license: GPLv3
@@ -40,7 +42,6 @@ def get_z_score(bin, reference_bins):
     :param bin: bin
     :param reference_bins: reference bins
     :return: float
-    :copyright: (c) 2013 Roy Straver
     """
     if len(reference_bins) == 0:
         return np.nan

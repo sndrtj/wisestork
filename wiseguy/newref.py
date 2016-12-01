@@ -2,6 +2,8 @@
 wiseguy.newref
 ~~~~~~~~~~~~~~
 
+:copyright: (c) 2013 Roy Straver
+:copyright: (c) 2013 VU University Medical Center
 :copyright: (c) 2016 Sander Bollen
 :copyright: (c) Leiden University Medical Center
 :license: GPLv3
