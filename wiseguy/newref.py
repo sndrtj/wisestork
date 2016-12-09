@@ -11,7 +11,7 @@ wiseguy.newref
 
 import numpy as np
 
-from .utils import BedLine, get_bins
+from .utils import BedLine, get_bins, BedReader
 from pyfaidx import Fasta
 
 
@@ -30,7 +30,7 @@ def get_unique_bins(fasta, binsize):
     return bins
 
 
-def build_main_list(bins, binsize, reference):
+def build_main_list(bins, binsize, reference, binfile=None):
     """
     Build main list of bins.
     All unique positions are selected
@@ -40,7 +40,11 @@ def build_main_list(bins, binsize, reference):
     :param reference: instance of pyfaidx.Fasta
     :return: list of bins (1 per position), sorted by median value
     """
-    unique_positions = get_unique_bins(reference, binsize)
+    if not binfile:
+        unique_positions = get_unique_bins(reference, binsize)
+    else:
+        reader = BedReader(binfile)
+        unique_positions = [x for x in reader]
     median_bins = []
     for i, u in enumerate(unique_positions):
         working_bins = bins[i::len(unique_positions)]
@@ -57,7 +61,7 @@ class ReferenceBinGenerator(object):
     With the second item being similar bins
     """
 
-    def __init__(self, inputs, n_bins, reference, binsize=int(1e6)):
+    def __init__(self, inputs, n_bins, reference, binsize=int(1e6), binfile=None):
         """
         Create instance of ReferenceBinGenerator
         :param inputs: list of paths to files of gc-corrected bedgraph files
@@ -67,6 +71,7 @@ class ReferenceBinGenerator(object):
         self.n_bins = n_bins
         self.fasta = Fasta(reference)
         self.binsize = binsize
+        self.binfile = binfile
         self.__bins = self.get_all_bins()
         self.__idx = 0
 
@@ -77,7 +82,7 @@ class ReferenceBinGenerator(object):
                 for record in ihandle:
                     vals = record.strip().split("\t")
                     bins += [BedLine(vals[0], int(vals[1]), int(vals[2]), float(vals[3]))]
-        return build_main_list(bins, self.binsize, self.fasta)
+        return build_main_list(bins, self.binsize, self.fasta, self.binfile)
 
     def __next__(self):
         if self.__idx == len(self.__bins):
@@ -127,7 +132,7 @@ class ReferenceBinGenerator(object):
         return non_outliers
 
 
-def newref(input_paths, output_path, reference, binsize, n_bins=250):
+def newref(input_paths, output_path, reference, binsize, n_bins=250, binfile=None):
     """
     Create a new reference bed file
     :param input_paths: paths to gc-corrected BED files
@@ -136,7 +141,7 @@ def newref(input_paths, output_path, reference, binsize, n_bins=250):
     :param binsize: binsize
     :param n_bins: number of neighbour bins to consider
     """
-    gen = ReferenceBinGenerator(input_paths, n_bins, reference, binsize)
+    gen = ReferenceBinGenerator(input_paths, n_bins, reference, binsize, binfile)
     ohandle = open(output_path, "wb")
     for x in gen:
         chrom = x[0].chromosome

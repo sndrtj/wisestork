@@ -21,6 +21,8 @@ shared_options = [
                  help="Bin size to use. Default = 50000"),
     click.option("--reference", "-R", type=click.Path(exists=True), required=True,
                  help="Path to reference fasta"),
+    click.option('--bin-file', '-L', type=click.Path(exists=True), required=False,
+                 help="Optional path to region BED file"),
     click.version_option(version=__version__)
 ]
 
@@ -57,7 +59,8 @@ def count_cli(**kwargs):
     output = kwargs.get("output", None)
     binsize = kwargs.get("binsize", 50000)
     reference = kwargs.get("reference", None)
-    count(input=input, output=output, binsize=binsize, reference=reference)
+    regions = kwargs.get("bin_file", None)
+    count(input=input, output=output, binsize=binsize, reference=reference, binfile=regions)
 
 
 @click.command(short_help="GC correct")
@@ -133,8 +136,9 @@ def newref_cli(**kwargs):
     reference_fasta = kwargs.get("reference", None)
     binsize = kwargs.get("binsize", 50000)
     n_bins = kwargs.get("n_bins", 250)
-
-    newref(input_paths=input_path, output_path=output_path,reference=reference_fasta, binsize=binsize, n_bins=n_bins)
+    regions = kwargs.get("bin_file", None)
+    newref(input_paths=input_path, output_path=output_path, reference=reference_fasta,
+           binsize=binsize, n_bins=n_bins, binfile=regions)
 
 
 @click.group()

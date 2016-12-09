@@ -12,7 +12,7 @@ wiseguy.count
 import argparse
 import pysam
 
-from .utils import get_bins
+from .utils import get_bins, BedReader, BedLine
 
 
 def reads_per_bin(bam_reader, chromosome, bin):
@@ -50,7 +50,7 @@ def get_chromosomes_from_fasta(fa):
     pass
 
 
-def count(input, output, binsize, reference):
+def count(input, output, binsize, reference, binfile=None):
     """
     Main function for counting reads per bin
     :param input: Path to input BAM
@@ -59,13 +59,20 @@ def count(input, output, binsize, reference):
     :param reference: path to reference fasta
     """
     # TODO: check whether chromosome names in reference match those in bam file
-    samfile = pysam.AlignmentFile(input)
+    samfile = pysam.AlignmentFile(input, 'rb')
     chromosomes = get_chromosomes_from_header(samfile.header)
     with open(output, "wb") as ohandle:
-        for ch, ln in chromosomes:
-            for bin in get_bins(ln, binsize):
-                val = reads_per_bin(samfile, ch, bin)
-                bed = "{0}\t{1}\t{2}\t{3}".format(ch, bin.start, bin.end, val)
-                ohandle.write(bytes(bed + "\n", 'utf-8'))
+        if binfile:
+            bin_reader = BedReader(binfile)
+            for bin in bin_reader:
+                val = reads_per_bin(samfile, bin.chromosome, bin)
+                bed = BedLine(bin.chromosome, bin.start, bin.end, val)
+                ohandle.write(bytes(bed) + b"\n")
+        else:
+            for ch, ln in chromosomes:
+                for bin in get_bins(ln, binsize):
+                    val = reads_per_bin(samfile, ch, bin)
+                    bed = BedLine(ch, bin.start, bin.end, val)
+                    ohandle.write(bytes(bed) + b"\n")
 
 
