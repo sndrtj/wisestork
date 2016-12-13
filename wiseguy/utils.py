@@ -41,7 +41,10 @@ class BedLine(namedtuple("BedLine", ["chromosome", "start", "end", "value"])):
     @classmethod
     def fromline(cls, str):
         contents = str.split(b"\t")
-        return cls(contents[0], int(contents[1]), int(contents[2]), float(contents[3]))
+        if len(contents) == 3:
+            return cls(*map(attempt_numeric, contents), value="NA")
+        else:
+            return cls(*map(attempt_numeric, contents))
 
 
 def attempt_numeric(value):

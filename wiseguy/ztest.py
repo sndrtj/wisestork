@@ -77,7 +77,7 @@ def ztest(input_path, output_path, database_path, counter_interval=1000):
             reference_bins += [BedLine.fromline(x.encode()) for x in tbx.fetch(line.chromosome.decode(), line.start, line.end)]
         z = get_z_score(tmp, reference_bins)
         n = BedLine(tmp.chromosome.decode(), tmp.start, tmp.end, z)
-        ohandle.write(bytes(str(n) + "\n", 'utf-8'))
+        ohandle.write(bytes(n) + b"\n")
 
     ohandle.close()
     ihandle.close()
