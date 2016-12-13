@@ -78,10 +78,8 @@ class ReferenceBinGenerator(object):
     def get_all_bins(self):
         bins = []
         for inp in self.inputs:
-            with open(inp) as ihandle:
-                for record in ihandle:
-                    vals = record.strip().split("\t")
-                    bins += [BedLine(vals[0], int(vals[1]), int(vals[2]), float(vals[3]))]
+            tmp_reader = BedReader(inp)
+            bins += [x for x in tmp_reader]
         return build_main_list(bins, self.binsize, self.fasta, self.binfile)
 
     def __next__(self):
@@ -152,4 +150,4 @@ def newref(input_paths, output_path, reference, binsize, n_bins=250, binfile=Non
             references = np.nan
 
         t = BedLine(chrom, start, end, references)
-        ohandle.write(bytes(str(t) + "\n", 'utf-8'))
+        ohandle.write(bytes(t) + b"\n")

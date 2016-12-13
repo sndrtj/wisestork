@@ -102,7 +102,8 @@ class BedReader(object):
         elif len(contents) == 4:
             return BedLine(*map(attempt_integer, contents))
         else:
-            pass
+            self.__handle.close()
+            raise StopIteration
 
     def next(self):
         return self.__next__()
