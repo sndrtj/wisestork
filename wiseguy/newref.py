@@ -145,7 +145,15 @@ def newref(input_paths, output_path, reference, binsize, n_bins=250, binfile=Non
         chrom = x[0].chromosome
         start = x[0].start
         end = x[0].end
-        references = "|".join([str(x).replace("\t", ",") for x in x[1]])
+        references = []
+        for record in x[1]:
+            fmt = "{0},{1},{2}"
+            if isinstance(record.chromosome, str):
+                references.append(fmt.format(record.chromosome, record.start, record.end))
+            else:
+                references.append(fmt.format(record.chromosome.decode(), record.start, record.end))
+        references = "|".join(references)
+
         if len(references) == 0:
             references = np.nan
 
