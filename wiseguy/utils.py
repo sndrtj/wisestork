@@ -44,17 +44,22 @@ class BedLine(namedtuple("BedLine", ["chromosome", "start", "end", "value"])):
         return cls(contents[0], int(contents[1]), int(contents[2]), float(contents[3]))
 
 
-def attempt_integer(value):
+def attempt_numeric(value):
     """
-    Attempt to make an integer from a string
-    return string when not possible
+    Attempt to make an numeric from a string
+    first try to make an integer
+    When that is not possible, make a float.
+    When that too fails, return the string
     :param value: the input string
     :return: the possibly-converted item
     """
     try:
         return int(value)
     except ValueError:
-        return value
+        try:
+            return float(value)
+        except ValueError:
+            return value
 
 
 def get_bins(chromosome_length, binsize):
@@ -98,9 +103,9 @@ class BedReader(object):
             raise StopIteration
         contents = line.strip().split(b"\t")
         if len(contents) == 3:
-            return BedLine(*map(attempt_integer, contents), val='NA')
+            return BedLine(*map(attempt_numeric, contents), val='NA')
         elif len(contents) == 4:
-            return BedLine(*map(attempt_integer, contents))
+            return BedLine(*map(attempt_numeric, contents))
         else:
             self.__handle.close()
             raise StopIteration

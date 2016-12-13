@@ -14,7 +14,7 @@ import numpy as np
 import statsmodels.nonparametric.smoothers_lowess as statlow
 from pyfaidx import Fasta
 
-from .utils import BedLine, Bin, attempt_integer
+from .utils import BedLine, Bin, attempt_numeric
 from .gc import get_gc_for_bin, get_n_per_bin
 
 
@@ -78,7 +78,7 @@ def correct(inputs, fasta, frac_n=0.1, frac_r=0.0001, lowess_iter=3, lowess_frac
 
 def gc_correct(input, output, reference, frac_n, frac_r, iter, frac_lowess):
     fasta = Fasta(reference)
-    bed_lines = [BedLine(*map(attempt_integer, x.split("\t"))) for x in open(input)]
+    bed_lines = [BedLine(*map(attempt_numeric, x.split("\t"))) for x in open(input)]
     corrected = correct(bed_lines, fasta, frac_n, frac_r, iter, frac_lowess)
 
     with open(output, "wb") as ohandle:
