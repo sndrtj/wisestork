@@ -23,11 +23,17 @@ def utf8(value):
     return bytes(value, "utf-8")
 
 
+def as_str(value):
+    if isinstance(value, bytes):
+        return value.decode()
+    return value
+
+
 class BedLine(namedtuple("BedLine", ["chromosome", "start", "end", "value"])):
     __slots__ = ()
 
     def __str__(self):
-        return "{0}\t{1}\t{2}\t{3}".format(self.chromosome, self.start, self.end, self.value)
+        return "{0}\t{1}\t{2}\t{3}".format(as_str(self.chromosome), self.start, self.end, as_str(self.value))
 
     def __bytes__(self):
         return b"\t".join(map(utf8, [getattr(self, x) for x in self._fields]))
@@ -39,8 +45,8 @@ class BedLine(namedtuple("BedLine", ["chromosome", "start", "end", "value"])):
         return not self.__eq__(other)
 
     @classmethod
-    def fromline(cls, str):
-        contents = str.split(b"\t")
+    def fromline(cls, line):
+        contents = utf8(line).split(b"\t")
         if len(contents) == 3:
             return cls(*map(attempt_numeric, contents), value="NA")
         else:

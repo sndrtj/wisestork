@@ -1,0 +1,9 @@
+language: python
+python:
+  - 3.4
+install:
+  - pip install -r requirements.txt
+  - pip install coveralls --use-wheel
+script: python setup.py develop && py.test -v --cov wiseguy --cov-report term-mising
+after_success:
+  - coveralls

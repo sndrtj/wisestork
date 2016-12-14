@@ -6,3 +6,5 @@ statsmodels
 sklearn
 pysam
 pyfaidx
+pytest
+pytest-cov
