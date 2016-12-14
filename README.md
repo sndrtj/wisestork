@@ -1,3 +1,5 @@
+![travis](https://travis-ci.org/sndrtj/wisecondor)
+![coveralls](https://coveralls.io/github/sndrtj/wisecondor?branch=master)
 Wiseguy
 =======
 This is a complete re-implementation of the original Wisecondor program.
