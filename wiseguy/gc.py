@@ -11,6 +11,7 @@ wiseguy.gc
 
 from Bio.SeqUtils import GC
 
+
 def get_gc_for_bin(fasta, chromosome, bin):
     """
     Get number of GC bases in a region
@@ -20,7 +21,8 @@ def get_gc_for_bin(fasta, chromosome, bin):
     :return: integer
     """
     perc = GC(fasta[chromosome][bin.start:bin.end].seq)
-    return int((bin.start-bin.end)*(perc/100))
+    dist = bin.end-bin.start
+    return int((perc*dist)/100)
 
 
 def get_n_per_bin(fasta, chromosome, bin):
