@@ -46,8 +46,7 @@ def get_chromosomes_from_fasta(fa):
     :param fa: instance of pyfaidx.Fasta
     :return: list of tuples of (chromosome names, chromosome_lenght)
     """
-    # TODO
-    pass
+    return [(x, len(fa[x])) for x in fa.keys()]
 
 
 def count(input, output, binsize, reference, binfile=None):
