@@ -58,3 +58,22 @@ class TestBedline(object):
         three_fields = BedLine.fromline("chr1\t1\t100")
         assert three_fields == BedLine(b"chr1", 1, 100, b"NA")
 
+
+class TestBedReader:
+
+    def test_bed(self):
+        reader = BedReader(filename="test/data/test.bed")
+        records = [x for x in reader]
+        assert len(records) == 5
+        assert all([x.value == "NA" for x in records])
+        assert all([x.chromosome == b"chr1" for x in records])
+
+    def test_bedgraph(self):
+        reader = BedReader(filename="test/data/test.bedgraph")
+        records = [x for x in reader]
+        assert len(records) == 5
+        assert records[0].value == 10
+        assert records[-1].value == 40
+        assert all([x.chromosome == b"chr1" for x in records])
+
+

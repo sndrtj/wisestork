@@ -112,7 +112,7 @@ class BedReader(object):
             raise StopIteration
         contents = line.strip().split(b"\t")
         if len(contents) == 3:
-            return BedLine(*map(attempt_numeric, contents), val='NA')
+            return BedLine(*map(attempt_numeric, contents), value='NA')
         elif len(contents) == 4:
             return BedLine(*map(attempt_numeric, contents))
         else:
