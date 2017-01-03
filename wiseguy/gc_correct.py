@@ -4,12 +4,13 @@ wiseguy.gc_correct
 :copyright: (c) 2013 Roy Straver
 :copyright: (c) VU University Medical Center
 :copyright: (c) 2016 Sander Bollen
-:copyright: (c) 2016 Leiden Univeristy Medical Center
+:copyright: (c) 2016 Leiden University Medical Center
 :license: GPLv3
 """
 
 import argparse
 import numpy as np
+import warnings
 
 import statsmodels.nonparametric.smoothers_lowess as statlow
 from pyfaidx import Fasta
@@ -18,19 +19,17 @@ from .utils import BedLine, Bin, attempt_numeric
 from .gc import get_gc_for_bin, get_n_per_bin
 
 
-def filter_bin(value, chromosome, bin, ref_fasta, frac_n, frac_r):
+def filter_bin(bin, ref_fasta, frac_n, frac_r):
     """
     Return True if a 'correct' bin, return False if an 'incorrect' bin
-    :param value: number of reads in this bin
-    :param chromosome: name of chromosome
-    :param bin: Bin namedtuple
+    :param bin: BedLine namedtuple
     :param ref_fasta: an instance of pyfaidx.Fasta
     :param frac_n: maximal fraction of N-bases per bin
     :param frac_r: minimum fraction of reads per bin
     :return: Boolean
     """
-    ns = get_n_per_bin(ref_fasta, chromosome, bin)
-    return ns < ((bin.end - bin.start)*frac_n) and value > ((bin.end - bin.start)*frac_r)
+    ns = get_n_per_bin(ref_fasta, bin.chromosome, bin)
+    return ns < ((bin.end - bin.start)*frac_n) and bin.value > ((bin.end - bin.start)*frac_r)
 
 
 def correct(inputs, fasta, frac_n=0.1, frac_r=0.0001, lowess_iter=3, lowess_frac=0.1):
@@ -48,15 +47,18 @@ def correct(inputs, fasta, frac_n=0.1, frac_r=0.0001, lowess_iter=3, lowess_frac
     reads = []
     gcs = []
     for line in inputs:
-        chromosome = line.chromosome
-        bin = Bin(line.start, line.end)
-        if filter_bin(line.value, chromosome, bin, fasta, frac_n, frac_r):
-            gcs.append(get_gc_for_bin(fasta, chromosome, bin))
+        if filter_bin(line, fasta, frac_n, frac_r):
+            gcs.append(get_gc_for_bin(fasta, line.chromosome, line))
             reads.append(line.value)
 
     reads = np.array(reads, np.float)
     gcs = np.array(gcs, np.float)
-    delta = 0.01 * len(gcs)
+    if lowess_frac*len(reads) < 4 and len(reads) > 0:  # need at least four data ponts
+        warnings.warn("Too few data points for lowess. Raising lowess_frac")
+        lowess_frac = 4.0/len(reads)
+        delta = 0  # remove delta in this case
+    else:
+        delta = 0.01 * len(gcs)
     lowess = statlow.lowess(reads, gcs, return_sorted=False,
                             delta=delta, frac=lowess_frac,
                             it=lowess_iter).tolist()
@@ -64,13 +66,11 @@ def correct(inputs, fasta, frac_n=0.1, frac_r=0.0001, lowess_iter=3, lowess_frac
     corrected_lines = []
 
     for line in inputs:
-        chromosome = line.chromosome
-        bin = Bin(line.start, line.end)
-        if filter_bin(line.value, chromosome, bin, fasta, frac_n, frac_r):
+        if filter_bin(line, fasta, frac_n, frac_r):
             corr_val = float(line.value) / lowess.pop(0)
         else:
             corr_val = 0
-        n_bed = BedLine(chromosome, line.start, line.end, corr_val)
+        n_bed = BedLine(line.chromosome, line.start, line.end, corr_val)
         corrected_lines.append(n_bed)
 
     return corrected_lines
