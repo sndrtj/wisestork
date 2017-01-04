@@ -9,6 +9,7 @@ wiseguy.newref
 :license: GPLv3
 """
 
+import math
 import numpy as np
 
 from .utils import BedLine, get_bins, BedReader
@@ -36,6 +37,9 @@ def build_main_list(bins, binsize, reference, binfile=None):
     All unique positions are selected
     Then the median value of all bins on those positions are calculated
     :param bins: list of bins
+        order of this list should correspond to input files
+        e.g. if 3 bins per file, this list looks like
+        [1,2,3,1,2,3,1,2,3 ... ]
     :param binsize: binsize:
     :param reference: instance of pyfaidx.Fasta
     :return: list of bins (1 per position), sorted by median value
@@ -98,12 +102,17 @@ class ReferenceBinGenerator(object):
         return self
 
     def get_nearest_at_idx(self, idx):
-        if idx < self.n_bins:
-            vals = self.__bins[:idx]
-        elif idx > len(self.__bins) - self.n_bins:
-            vals = self.__bins[idx:]
+        e_dist = len(self.__bins) - idx
+        # starting edge; if distance from start less
+        # or equal to half the window size
+        if idx == 0 or 0 < idx <= self.n_bins//2:
+            vals = self.__bins[:self.n_bins]
+        # ending edge; if distance from end is less
+        # or equal to half the window size
+        elif e_dist <= self.n_bins//2:
+            vals = self.__bins[-self.n_bins:]
         else:
-            vals = self.__bins[idx-(self.n_bins//2):idx+(self.n_bins//2)]
+            vals = self.__bins[idx-(self.n_bins//2):idx+int(math.ceil((self.n_bins/2)))]
         return vals
 
     def filter_bins(self, target_bin, bins):
@@ -117,10 +126,7 @@ class ReferenceBinGenerator(object):
         :param bins:
         :return: filtered list of bins (may be empty)
         """
-        ref_bins = [x for x in bins if
-                    x.chromosome != target_bin.chromosome and
-                    x.start != target_bin.start and
-                    x.end != target_bin.end]
+        ref_bins = [x for x in bins if x != target_bin]
         if len(ref_bins) == 0:
             return ref_bins
 
