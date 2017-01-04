@@ -27,7 +27,6 @@ setup(
         "numpy",
         "matplotlib",
         "statsmodels",
-        "sklearn",
         "pysam",
         "pyfaidx",
         "biopython",
