@@ -89,7 +89,7 @@ def gcc_cli(**kwargs):
                frac_r=frac_r, frac_n=frac_n, iter=iter, frac_lowess=frac_lowess)
 
 
-@click.command(short_help="Calculte Z-scores")
+@click.command(short_help="Calculate Z-scores")
 @generic_option(shared_options)
 @click.option("--input", "-I", type=click.Path(exists=True), required=True, help="Path to input BED file")
 @click.option("--output", "-O", type=click.Path(), required=True, help="Path to output BED file")

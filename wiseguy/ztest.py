@@ -9,31 +9,14 @@ wiseguy.ztest
 :license: GPLv3
 """
 
-import argparse
 import gzip
+from math import isnan
 import sys
 
 import numpy as np
-import pysam
+import progressbar
 
-from .utils import BedLine
-
-
-def get_refbins_from_db(tbx_handle, bed_line):
-    """
-    Get reference bins from database
-    :param tbx_handle: tabix_handle
-    :param bed_line: BedLine namedtuple
-    :return: list of BedLine namedtuples (may be empty)
-    """
-    record = [x for x in tbx_handle.fetch(bed_line.chromosome.decode(), bed_line.start, bed_line.end)][0]
-    rows = [x.replace(",", "\t") for x in record.strip().split("\t")[3].split("|")]
-    if rows == [""]:
-        return []
-    if rows == ['nan']:
-        return []
-    bedlines = [BedLine.fromline(x.encode()) for x in rows]
-    return bedlines
+from .utils import BedLine, utf8
 
 
 def get_z_score(bin, reference_bins):
@@ -54,40 +37,79 @@ def get_z_score(bin, reference_bins):
     return Z
 
 
-def ztest(input_path, output_path, database_path, counter_interval=1000):
+def ztest(input_path, output_path, database_path):
     """
-    Calculate z scores from bed file and database bed file
+    Calculate z scores from gzipped bed file and database bed file
     :param input_path: query bed file path
     :param output_path: output bed file path
     :param database_path: database file path
-    :param counter_interval: Interval for counter updates (default: 1000)
     :return: -
     """
-    db_handle = pysam.Tabixfile(database_path)
-    ihandle = gzip.open(input_path)
-    tbx = pysam.Tabixfile(input_path)
     ohandle = open(output_path, "wb")
-    for i, r in enumerate(ihandle):
-        if i % counter_interval == 0:
-            print("Processed {i} records".format(i=i), file=sys.stderr)
-        tmp = BedLine.fromline(r)
-        lines = get_refbins_from_db(db_handle, tmp)
-        reference_bins = []
-        for line in lines:
-            reference_bins += [BedLine.fromline(x.encode()) for x in tbx.fetch(line.chromosome.decode(), line.start, line.end)]
-        z = get_z_score(tmp, reference_bins)
-        n = BedLine(tmp.chromosome.decode(), tmp.start, tmp.end, z)
+    refdict = build_reference_index(database_path)
+    with gzip.open(input_path) as ihandle:
+        bedlines = [BedLine.fromline(x) for x in ihandle]
+
+    if not len(bedlines) == len(refdict):
+        raise ValueError("Reference and query bed files "
+                         "are of different size!")
+
+    print("Calculating Z-scores")
+    bar = progressbar.ProgressBar(max_value=len(bedlines))
+
+    for i, x in enumerate(bedlines):
+        bar.update(i)
+        key = create_key(x)
+        reference_bins = [bedlines[i] for i in refdict[key]]
+        z = get_z_score(x, reference_bins)
+        n = BedLine(x.chromosome.decode(), x.start, x.end, z)
         ohandle.write(bytes(n) + b"\n")
-
+    bar.finish()
     ohandle.close()
-    ihandle.close()
-    tbx.close()
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-I", "--input", type=str, required=True, help="Input bgzipped and tabixxed bedgraph file")
-    parser.add_argument("-D", "--database", type=str, required=True, help="Reference database")
-    parser.add_argument("-O", "--output", type=str, required=True, help="Output file")
+def create_key(bedline):
+    return b"|".join(map(utf8, [bedline.chromosome, bedline.start, bedline.end]))
 
-    args = parser.parse_args()
+
+def build_reference_index(database_path):
+    """
+    Build a reference index from a database path.
+
+    The index is a dictionary of type :
+    {key: [list of indices]}
+
+    where the key is a bed region, and the indices are indices of similar
+    bins. Naturally, this means that query bed files _must_ be of
+    _exactly_ the same size as the database, and the sorting order _must_
+    also be identical.
+
+    :param database_path:
+    :return: index dictionary
+    """
+    print("Building index", file=sys.stderr)
+    n = 0
+    d = {}
+    with gzip.open(database_path) as db_handle:
+        for i, line in enumerate(db_handle):
+            b = BedLine.fromline(line)
+            key = create_key(b)
+            d[key] = i
+            n = i + 1
+    refdict = {}
+    with gzip.open(database_path) as db_handle2:
+        bar = progressbar.ProgressBar(max_value=n)
+        for o, l in enumerate(db_handle2):
+            bar.update(o)
+            b = BedLine.fromline(l)
+            key2 = create_key(b)
+            if isinstance(b.value, float) and isnan(b.value):
+                refdict[key2] = []
+            else:
+                it = [BedLine.fromline(x, b",") for x in b.value.split(b"|")]
+                keys = list(map(create_key, it))
+                idxs = [d[x] for x in keys]
+                refdict[key2] = idxs
+        bar.finish()
+
+    return refdict

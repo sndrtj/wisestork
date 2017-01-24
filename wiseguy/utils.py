@@ -45,8 +45,8 @@ class BedLine(namedtuple("BedLine", ["chromosome", "start", "end", "value"])):
         return not self.__eq__(other)
 
     @classmethod
-    def fromline(cls, line):
-        contents = utf8(line).split(b"\t")
+    def fromline(cls, line, sep=b"\t"):
+        contents = utf8(line).split(sep)
         if len(contents) == 3:
             return cls(*map(attempt_numeric, contents), value="NA")
         else:
