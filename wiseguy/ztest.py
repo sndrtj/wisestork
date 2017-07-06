@@ -32,7 +32,7 @@ def get_z_score(bin, reference_bins):
     stddev = np.std([x.value for x in reference_bins])
 
     if stddev == 0:
-        return 0
+        return np.nan
     Z = (bin.value - average) / stddev
     return Z
 
