@@ -72,6 +72,19 @@ earlier two:
 
 `wiseguy zscore -I <input.bed.gz> -R <fasta.fa> -O <out.z.bed> -D <dictionary.bed.gz> -B <binsize>`
 
+
+### User-supplied bins
+
+In stead of supplying a bin _size_ for each step, you may also supply a 
+bin _file_. This file should be a (preferably sorted) BED file with regions
+that exist in the input BAM file. This option is primarily useful for 
+WES analyses, where the bin file would correspond to a target/bait region
+file. Please do note that contigs must be identical to those in the 
+input BAM file. 
+
+You can supply a bin file using the `-L` flag for any subcommand.
+This will supersede any usage of the `-B` flag.
+
 ### Creating reference dictionaries
 
 The above assumes you have already created a reference dictionary. 
@@ -117,7 +130,7 @@ Commands:
   count       Count coverages
   gc-correct  GC correct
   newref      Create new reference
-  zscore      Calculte Z-scores
+  zscore      Calculate Z-scores
 ```
 
 You can additional help by typing `wiseguy <command> --help`
@@ -129,13 +142,14 @@ and the original wisecondor.
  
 * This re-implementation is organized as a regular python package, 
   while exposing several command-line tools. 
-* Python 3 support
+* Python 3 support. In fact, it's only tested on python 3.
 * All command-line tools now have UNIX-style argument parsing
 * Generating reference sets for small bin sizes is now possible in 
   much less time. 
 * Pickle files are no longer used. The output format is now regular BED,
   with a possible additional column. This means results can be used by 
   common downstream tools like Bedtools.
+* User supplied bin files in regular BED format. 
 * The countgc step is now redundant. Its functionality is now integrated
   in the gcc step. 
 * The reference bin selection method was modified. The
@@ -156,7 +170,4 @@ and the original wisecondor.
 ## TODO
 
 * Stouffer test, call and plot functions.
-* In-memory option for `zscore`, that should be much faster.
 * Some general speed ups. 
-* Option to supply a BED file with bins, as opposed to generating them
-from the reference sequence.
