@@ -30,7 +30,8 @@ setup(
         "pyfaidx",
         "biopython",
         "scipy",
-        "click"
+        "click",
+        "progressbar2"
     ],
     entry_points={
         "console_scripts": [
