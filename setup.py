@@ -30,6 +30,7 @@ setup(
         "pysam",
         "pyfaidx",
         "biopython",
+        "scipy",
         "click"
     ],
     entry_points={
