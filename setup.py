@@ -7,9 +7,7 @@ setup.py
 """
 from os.path import abspath, dirname, join
 
-from setuptools import setup
-
-from wiseguy import __version__
+from setuptools import setup, find_packages
 
 
 readme_file = join(abspath(dirname(__file__)), "README.md")
@@ -19,10 +17,11 @@ with open(readme_file) as desc_handle:
 
 setup(
     name="wiseguy",
-    version=__version__,
+    version="0.1.0",
     description="",
     author="Sander Bollen",
     license="GPL",
+    packages=find_packages(),
     install_requires=[
         "numpy",
         "matplotlib",
