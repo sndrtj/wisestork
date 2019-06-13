@@ -1,5 +1,5 @@
 """
-wiseguy.newref
+wisestork.newref
 ~~~~~~~~~~~~~~
 
 :copyright: (c) 2013 Roy Straver

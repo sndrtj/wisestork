@@ -1,5 +1,5 @@
 import pytest
-from wiseguy.utils import *
+from wisestork.utils import *
 
 @pytest.fixture
 def test_bedline():

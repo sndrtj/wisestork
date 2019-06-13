@@ -1,5 +1,5 @@
 """
-wiseguy.count
+wisestork.count
 ~~~~~~~~~~~~~~
 
 :copyright: (c) 2013 Roy Straver

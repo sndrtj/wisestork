@@ -1,8 +1,8 @@
 from pyfaidx import Fasta
 from pytest import fixture
 
-from wiseguy.gc_correct import filter_bin, correct
-from wiseguy.utils import BedLine, attempt_numeric
+from wisestork.gc_correct import filter_bin, correct
+from wisestork.utils import BedLine, attempt_numeric
 
 import sys
 

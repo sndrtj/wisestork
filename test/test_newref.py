@@ -4,8 +4,8 @@ from tempfile import NamedTemporaryFile
 import pytest
 from pyfaidx import Fasta
 
-from wiseguy.newref import *
-from wiseguy.utils import BedReader, BedLine
+from wisestork.newref import *
+from wisestork.utils import BedReader, BedLine
 
 
 @pytest.fixture(scope="module")

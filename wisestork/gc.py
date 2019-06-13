@@ -1,5 +1,5 @@
 """
-wiseguy.gc
+wisestork.gc
 ~~~~~~~~~~
 
 :copyright: (c) 2013 Roy Straver

@@ -1,7 +1,7 @@
 from click.testing import CliRunner
 import pytest
 
-from wiseguy.wiseguy import count_cli, gcc_cli, newref_cli, zscore_cli
+from wisestork.wisestork import count_cli, gcc_cli, newref_cli, zscore_cli
 
 
 @pytest.fixture()

@@ -1,5 +1,5 @@
 """
-wiseguy.gc_correct
+wisestork.gc_correct
 
 :copyright: (c) 2013 Roy Straver
 :copyright: (c) VU University Medical Center

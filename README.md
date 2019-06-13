@@ -1,13 +1,13 @@
 [![Build Status](https://travis-ci.org/sndrtj/wisecondor.svg?branch=master)](https://travis-ci.org/sndrtj/wisecondor)
 [![codecov](https://codecov.io/gh/sndrtj/wisecondor/branch/master/graph/badge.svg)](https://codecov.io/gh/sndrtj/wisecondor)
 
-Wiseguy
+Wisestork
 =======
 This is a complete re-implementation of the original Wisecondor program.
 Its original purpose was to detect trisomies and smaller CNVs in 
 maternal plasma samples using low-coverage WGS.
  
-Wiseguy adds practical support for small bin sizes,
+Wisestork adds practical support for small bin sizes,
 and is intended to be useful on regular WGS and Exome sequencing as well
 
 For a full overview of differences with the original Wisecondor, 
@@ -32,14 +32,14 @@ Furthermore, the following python packages are required:
 
 It is recommended you use a virtualenv. 
 
-To install wiseguy, create a virtualenv, install the python 
+To install wisestork, create a virtualenv, install the python 
 requirements using `pip install -r requirements.txt` and then run
 `python setup.py develop`
 
 
 ## Input 
 
-Wiseguy takes BAM files as input. These BAM files _must_ be indexed.
+Wisestork takes BAM files as input. These BAM files _must_ be indexed.
  
 Additionally, you must provide a reference Fasta file, which should
 likewise be indexed with `samtools faidx <fasta>`.  
@@ -49,19 +49,19 @@ likewise be indexed with `samtools faidx <fasta>`.
 A typical workflow starts with BAM files. Those BAM files _must_ be
 sorted and indexed. 
 
-The first step in a Wiseguy analysis is the `count` step. This 
+The first step in a Wisestork analysis is the `count` step. This 
 generates read counts per bin, and writes this to a BED file. The 
 command to do this, would look like the following:
 
-`wiseguy count -I <input.bam> -R <fasta.fa> -O <out.bed> -B <binszise>`
+`wisestork count -I <input.bam> -R <fasta.fa> -O <out.bed> -B <binszise>`
  
-The `-B` flag can be left out: Wiseguy defaults to a binsize of 50kb.
+The `-B` flag can be left out: Wisestork defaults to a binsize of 50kb.
 However, you will likely want a different binsize.
 
 Once you have the count BED file, we have to correct for GC bias. The
 command to do this is:
 
-`wiseguy gc-correct -I <input.bed> -R <fasta.fa> -O <out.gc.bed> -B <binsize>`
+`wisestork gc-correct -I <input.bed> -R <fasta.fa> -O <out.gc.bed> -B <binsize>`
 
 For the next step, we need the result bgzipped and tabixed, so you'll 
 have to execute `bgzip <out.gc.bed> && tabix -pbed <out.gc.bed.gz>`
@@ -71,7 +71,7 @@ It requires you to have generated a reference dictionary beforehand.
 The command to create z-scores again looks pretty similar to the 
 earlier two:
 
-`wiseguy zscore -I <input.bed.gz> -R <fasta.fa> -O <out.z.bed> -D <dictionary.bed.gz> -B <binsize>`
+`wisestork zscore -I <input.bed.gz> -R <fasta.fa> -O <out.z.bed> -D <dictionary.bed.gz> -B <binsize>`
 
 
 ### User-supplied bins
@@ -92,15 +92,15 @@ The above assumes you have already created a reference dictionary.
 If this is not the case, you will have to generate this file. 
 
 To create the reference dictionary you will need a set of gc-corrected
-BED files (from `wiseguy gc-correct`) of normal samples, and feed those
-to `wiseguy newref`. The rewref command will then find the nearest
+BED files (from `wisestork gc-correct`) of normal samples, and feed those
+to `wisestork newref`. The rewref command will then find the nearest
 neighbours of every bin. Later on, in the zscore command, this
 information is used to get a set of "reference bins" from the query
 sample. 
 
 Command to be used:
 
-`wiseguy newref -I <input.gz.bed> -I <input2.gz.bed> [...] -O <out.ref.bed> -R <fasta.fa> -B <binsize>`
+`wisestork newref -I <input.gz.bed> -I <input2.gz.bed> [...] -O <out.ref.bed> -R <fasta.fa> -B <binsize>`
  
 The output of this _must_ be sorted with bedtools, and then bgzipped
 and tabixed. 
@@ -108,7 +108,7 @@ and tabixed.
 ### Usage
 
 ```
-Usage: wiseguy [OPTIONS] COMMAND [ARGS]...
+Usage: wisestork [OPTIONS] COMMAND [ARGS]...
 
   Discover CNVs from BAM files.
 
@@ -134,7 +134,7 @@ Commands:
   zscore      Calculate Z-scores
 ```
 
-You can additional help by typing `wiseguy <command> --help`
+You can additional help by typing `wisestork <command> --help`
 
 ## Differences
 
@@ -167,8 +167,14 @@ and the original wisecondor.
 * Use of the `statsmodels` lowess function, rather than biopython's. 
   This results in a significant speed-up of the gc correction.
 
+## Naming
 
-## TODO
+Why name this tool wisestork, you might think?
+Well, a _condor_ is a bird. As this is a re-implementation / fork of
+wisecondor, I figured another bird would be nice name. As I live in The Hague,
+and The Hague has a stork as a ci ty symbol, I put one and one together.
+Thus, _wisestork_ was born. 
 
-* Stouffer test, call and plot functions.
-* Some general speed ups. 
+## License
+
+GPLv3

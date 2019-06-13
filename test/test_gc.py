@@ -1,7 +1,7 @@
 from pyfaidx import Fasta
 
-from wiseguy.gc import *
-from wiseguy.utils import get_bins
+from wisestork.gc import *
+from wisestork.utils import get_bins
 
 
 class TestFunctions:

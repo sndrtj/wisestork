@@ -1,5 +1,5 @@
 """
-wiseguy.wiseguy
+wisestork.wisestork
 ~~~~~~~~~~~~~~~~~~~~~
 
 :copyright: (c) 2013 Roy Straver

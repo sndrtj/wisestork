@@ -9,8 +9,8 @@ install:
   - pip install -r requirements-dev.txt
   - pip install '.'
 script:
-  - flake8 --statistics wiseguy tests
-  - coverage run --source=wiseguy -m py.test -v test
+  - flake8 --statistics wisestork tests
+  - coverage run --source=wisestork -m py.test -v test
   - coverage xml
   - coverage report -m
 after_success:

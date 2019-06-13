@@ -3,8 +3,8 @@ import random
 
 import pytest
 
-from wiseguy.ztest import *
-from wiseguy.utils import BedLine
+from wisestork.ztest import *
+from wisestork.utils import BedLine
 
 ValueObject = namedtuple("ValueObject", ['value'])  # little helper object
 

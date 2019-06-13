@@ -3,7 +3,7 @@ import pyfaidx
 
 from tempfile import NamedTemporaryFile
 from hashlib import sha1
-from wiseguy.count import *
+from wisestork.count import *
 
 
 class TestFunctions:

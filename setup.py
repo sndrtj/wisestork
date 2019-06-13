@@ -16,7 +16,7 @@ with open(readme_file) as desc_handle:
 
 
 setup(
-    name="wiseguy",
+    name="wisestork",
     version="0.1.0",
     description="",
     author="Sander Bollen",
@@ -35,7 +35,7 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "wiseguy = wiseguy.wiseguy:main"
+            "wisestork = wisestork.wisestork:main"
         ]
     },
     classifiers=[

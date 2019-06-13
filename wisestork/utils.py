@@ -1,5 +1,5 @@
 """
-wiseguy.utils
+wisestork.utils
 ~~~~~~~~~~~~~
 
 :copyright: (c) 2013 Roy Straver

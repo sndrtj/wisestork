@@ -1,5 +1,5 @@
 """
-wiseguy.ztest
+wisestork.ztest
 ~~~~~~~~~~~~~
 
 :copyright: (c) 2013 Roy Straver
