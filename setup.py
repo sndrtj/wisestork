@@ -18,6 +18,8 @@ setup(
     name="wisestork",
     version="0.1.0",
     description="Within-sample CNV calling",
+    long_description=long_desc,
+    long_description_content_type="text/markdown",
     author="Sander Bollen",
     author_email="sander@sndrtj.eu",
     python_requires=">=3.5",
