@@ -8,8 +8,6 @@ wiseguy.count
 :copyright: (c) 2016 Leiden University Medical Center
 :license: GPLv3
 """
-
-import argparse
 import pysam
 
 from .utils import get_bins, BedReader, BedLine
@@ -73,5 +71,3 @@ def count(input, output, binsize, reference, binfile=None):
                     val = reads_per_bin(samfile, ch, bin)
                     bed = BedLine(ch, bin.start, bin.end, val)
                     ohandle.write(bytes(bed) + b"\n")
-
-

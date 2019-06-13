@@ -8,14 +8,13 @@ wiseguy.gc_correct
 :license: GPLv3
 """
 
-import argparse
 import numpy as np
 import warnings
 
 import statsmodels.nonparametric.smoothers_lowess as statlow
 from pyfaidx import Fasta
 
-from .utils import BedLine, Bin, attempt_numeric
+from .utils import BedLine, attempt_numeric
 from .gc import get_gc_for_bin, get_n_per_bin
 
 
@@ -29,13 +28,15 @@ def filter_bin(bin, ref_fasta, frac_n, frac_r):
     :return: Boolean
     """
     ns = get_n_per_bin(ref_fasta, bin.chromosome, bin)
-    return ns < ((bin.end - bin.start)*frac_n) and bin.value > ((bin.end - bin.start)*frac_r)
+    return ns < ((bin.end - bin.start)*frac_n) and bin.value > ((bin.end - bin.start)*frac_r)  # noqa
 
 
-def correct(inputs, fasta, frac_n=0.1, frac_r=0.0001, lowess_iter=3, lowess_frac=0.1):
+def correct(inputs, fasta, frac_n=0.1, frac_r=0.0001, lowess_iter=3,
+            lowess_frac=0.1):
     """
     GC-correct input bed lines.
-    GC correction takes place with a local regression (LOWESS) on GC perc vs number of reads
+    GC correction takes place with a local regression (LOWESS) on GC perc vs
+    number of reads
     :param inputs: list of BedLine namedtuples
     :param fasta: instance of pyfaidx.Fasta
     :param frac_n: maximal fraction on N-bases per bin
@@ -53,7 +54,8 @@ def correct(inputs, fasta, frac_n=0.1, frac_r=0.0001, lowess_iter=3, lowess_frac
 
     reads = np.array(reads, np.float)
     gcs = np.array(gcs, np.float)
-    if lowess_frac*len(reads) < 4 and len(reads) > 0:  # need at least four data ponts
+    if lowess_frac*len(reads) < 4 and len(reads) > 0:
+        # need at least four data ponts
         warnings.warn("Too few data points for lowess. Raising lowess_frac")
         lowess_frac = 4.0/len(reads)
         delta = 0  # remove delta in this case
@@ -78,12 +80,10 @@ def correct(inputs, fasta, frac_n=0.1, frac_r=0.0001, lowess_iter=3, lowess_frac
 
 def gc_correct(input, output, reference, frac_n, frac_r, iter, frac_lowess):
     fasta = Fasta(reference)
-    bed_lines = [BedLine(*map(attempt_numeric, x.split("\t"))) for x in open(input)]
+    bed_lines = [BedLine(*map(attempt_numeric, x.split("\t"))) for
+                 x in open(input)]
     corrected = correct(bed_lines, fasta, frac_n, frac_r, iter, frac_lowess)
 
     with open(output, "wb") as ohandle:
         for line in corrected:
             ohandle.write(bytes(str(line) + "\n", 'utf-8'))
-
-
-

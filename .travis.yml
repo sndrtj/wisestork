@@ -7,4 +7,6 @@ install:
   - pip install --upgrade setuptools pip wheel
   - pip install -r requirements-dev.txt
   - pip install '.'
-script: py.test -v --cov wiseguy --cov-report term-missing
+script:
+  - flake8 --statistics wiseguy tests
+  - py.test -v --cov wiseguy --cov-report term-missing

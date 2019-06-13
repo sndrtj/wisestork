@@ -17,11 +17,14 @@ from .ztest import ztest
 from . import version as wiseguy_version
 
 shared_options = [
-    click.option("--binsize", "-B", type=click.IntRange(0, None), default=50000,
+    click.option("--binsize", "-B", type=click.IntRange(0, None),
+                 default=50000,
                  help="Bin size to use. Default = 50000"),
-    click.option("--reference", "-R", type=click.Path(exists=True), required=True,
+    click.option("--reference", "-R", type=click.Path(exists=True),
+                 required=True,
                  help="Path to reference fasta"),
-    click.option('--bin-file', '-L', type=click.Path(exists=True), required=False,
+    click.option('--bin-file', '-L', type=click.Path(exists=True),
+                 required=False,
                  help="Optional path to region BED file"),
     click.version_option(version=wiseguy_version())
 ]
@@ -43,8 +46,10 @@ def generic_option(options):
 
 @click.command(short_help="Count coverages")
 @generic_option(shared_options)
-@click.option("--output", "-O", type=click.Path(), required=True, help="Path to output BED file")
-@click.option("--input", "-I", type=click.Path(exists=True), required=True, help="Path to input BAM file")
+@click.option("--output", "-O", type=click.Path(), required=True,
+              help="Path to output BED file")
+@click.option("--input", "-I", type=click.Path(exists=True), required=True,
+              help="Path to input BAM file")
 def count_cli(**kwargs):
     """
     Take a BAM file, and calculate the number of reads per bin.
@@ -60,20 +65,25 @@ def count_cli(**kwargs):
     binsize = kwargs.get("binsize", 50000)
     reference = kwargs.get("reference", None)
     regions = kwargs.get("bin_file", None)
-    count(input=input, output=output, binsize=binsize, reference=reference, binfile=regions)
+    count(input=input, output=output, binsize=binsize, reference=reference,
+          binfile=regions)
 
 
 @click.command(short_help="GC correct")
 @generic_option(shared_options)
-@click.option("--output", "-O", type=click.Path(), required=True, help="Path to output BED file")
-@click.option("--input", "-I", type=click.Path(exists=True), required=True, help="Path to input BED file")
-@click.option("--frac-n", "-n", type=click.FLOAT, default=0.1, help="Maximum fraction of N-bases per bin. "
-                                                                    "Default = 0.1")
-@click.option("--frac-r", "-r", type=click.FLOAT, default=0.0001, help="Minimum fraction of reads per bin. "
-                                                                       "Default = 0.0001")
-@click.option("--iter", "-t", type=click.INT, default=3, help="Number of iterations for LOWESS function. Default = 3")
-@click.option("--frac-lowess", "-l", type=click.FLOAT, default=0.1, help="Fraction of data to use for LOWESS function. "
-                                                                         "Default = 0.1")
+@click.option("--output", "-O", type=click.Path(), required=True,
+              help="Path to output BED file")
+@click.option("--input", "-I", type=click.Path(exists=True), required=True,
+              help="Path to input BED file")
+@click.option("--frac-n", "-n", type=click.FLOAT, default=0.1,
+              help="Maximum fraction of N-bases per bin. Default = 0.1")
+@click.option("--frac-r", "-r", type=click.FLOAT, default=0.0001,
+              help="Minimum fraction of reads per bin. Default = 0.0001")
+@click.option("--iter", "-t", type=click.INT, default=3,
+              help="Number of iterations for LOWESS function. Default = 3")
+@click.option("--frac-lowess", "-l", type=click.FLOAT, default=0.1,
+              help="Fraction of data to use for LOWESS function. "
+                   "Default = 0.1")
 def gcc_cli(**kwargs):
     """
     GC-correct a BED file containing counts per region
@@ -86,14 +96,18 @@ def gcc_cli(**kwargs):
     iter = kwargs.get("iter", 3)
     frac_lowess = kwargs.get("frac_lowess", 0.1)
     gc_correct(input=input_path, output=output, reference=reference,
-               frac_r=frac_r, frac_n=frac_n, iter=iter, frac_lowess=frac_lowess)
+               frac_r=frac_r, frac_n=frac_n, iter=iter,
+               frac_lowess=frac_lowess)
 
 
 @click.command(short_help="Calculate Z-scores")
 @generic_option(shared_options)
-@click.option("--input", "-I", type=click.Path(exists=True), required=True, help="Path to input BED file")
-@click.option("--output", "-O", type=click.Path(), required=True, help="Path to output BED file")
-@click.option("--dictionary-file", "-D", type=click.Path(), required=True, help="Path to dictionary BED file")
+@click.option("--input", "-I", type=click.Path(exists=True), required=True,
+              help="Path to input BED file")
+@click.option("--output", "-O", type=click.Path(), required=True,
+              help="Path to output BED file")
+@click.option("--dictionary-file", "-D", type=click.Path(), required=True,
+              help="Path to dictionary BED file")
 def zscore_cli(**kwargs):
     """
     Calculate Z-scores from GC-corrected BED files.
@@ -111,14 +125,18 @@ def zscore_cli(**kwargs):
     input_path = kwargs.get("input", None)
     output_path = kwargs.get("output", None)
     database = kwargs.get("dictionary_file", None)
-    ztest(input_path=input_path, output_path=output_path, database_path=database)
+    ztest(input_path=input_path, output_path=output_path,
+          database_path=database)
 
 
 @click.command(short_help="Create new reference")
 @generic_option(shared_options)
-@click.option("--input", "-I", type=click.Path(exists=True), required=True, multiple=True, help="Path(s) to input BEDs")
-@click.option("--output", "-O", type=click.Path(), required=True, help="Path to output BED file")
-@click.option("--n-bins", "-n", type=click.INT, default=250, help="Amount of neighbours bins to consider per bin")
+@click.option("--input", "-I", type=click.Path(exists=True), required=True,
+              multiple=True, help="Path(s) to input BEDs")
+@click.option("--output", "-O", type=click.Path(), required=True,
+              help="Path to output BED file")
+@click.option("--n-bins", "-n", type=click.INT, default=250,
+              help="Amount of neighbours bins to consider per bin")
 def newref_cli(**kwargs):
     """
     Create a new reference dictionary BED file.
@@ -137,7 +155,8 @@ def newref_cli(**kwargs):
     binsize = kwargs.get("binsize", 50000)
     n_bins = kwargs.get("n_bins", 250)
     regions = kwargs.get("bin_file", None)
-    newref(input_paths=input_path, output_path=output_path, reference=reference_fasta,
+    newref(input_paths=input_path, output_path=output_path,
+           reference=reference_fasta,
            binsize=binsize, n_bins=n_bins, binfile=regions)
 
 

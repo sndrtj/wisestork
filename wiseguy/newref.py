@@ -65,7 +65,8 @@ class ReferenceBinGenerator(object):
     With the second item being similar bins
     """
 
-    def __init__(self, inputs, n_bins, reference, binsize=int(1e6), binfile=None):
+    def __init__(self, inputs, n_bins, reference, binsize=int(1e6),
+                 binfile=None):
         """
         Create instance of ReferenceBinGenerator
         :param inputs: list of paths to files of gc-corrected bedgraph files
@@ -112,7 +113,7 @@ class ReferenceBinGenerator(object):
         elif e_dist <= self.n_bins//2:
             vals = self.__bins[-self.n_bins:]
         else:
-            vals = self.__bins[idx-(self.n_bins//2):idx+int(math.ceil((self.n_bins/2)))]
+            vals = self.__bins[idx-(self.n_bins//2):idx+int(math.ceil((self.n_bins/2)))]  # noqa
         return vals
 
     def filter_bins(self, target_bin, bins):
@@ -132,11 +133,12 @@ class ReferenceBinGenerator(object):
 
         stdev = np.std([x.value for x in ref_bins])
         mean = np.mean([x.value for x in ref_bins])
-        non_outliers = [x for x in ref_bins if mean+(3*stdev) > x.value > mean-(3*stdev)]
+        non_outliers = [x for x in ref_bins if mean+(3*stdev) > x.value > mean-(3*stdev)]  # noqa
         return non_outliers
 
 
-def newref(input_paths, output_path, reference, binsize, n_bins=250, binfile=None):
+def newref(input_paths, output_path, reference, binsize, n_bins=250,
+           binfile=None):
     """
     Create a new reference bed file
     :param input_paths: paths to gc-corrected BED files
@@ -145,7 +147,8 @@ def newref(input_paths, output_path, reference, binsize, n_bins=250, binfile=Non
     :param binsize: binsize
     :param n_bins: number of neighbour bins to consider
     """
-    gen = ReferenceBinGenerator(input_paths, n_bins, reference, binsize, binfile)
+    gen = ReferenceBinGenerator(input_paths, n_bins, reference, binsize,
+                                binfile)
     ohandle = open(output_path, "wb")
     for x in gen:
         chrom = x[0].chromosome
@@ -155,9 +158,11 @@ def newref(input_paths, output_path, reference, binsize, n_bins=250, binfile=Non
         for record in x[1]:
             fmt = "{0},{1},{2}"
             if isinstance(record.chromosome, str):
-                references.append(fmt.format(record.chromosome, record.start, record.end))
+                references.append(fmt.format(record.chromosome,
+                                             record.start, record.end))
             else:
-                references.append(fmt.format(record.chromosome.decode(), record.start, record.end))
+                references.append(fmt.format(record.chromosome.decode(),
+                                             record.start, record.end))
         references = "|".join(references)
 
         if len(references) == 0:

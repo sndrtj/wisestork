@@ -33,13 +33,16 @@ class BedLine(namedtuple("BedLine", ["chromosome", "start", "end", "value"])):
     __slots__ = ()
 
     def __str__(self):
-        return "{0}\t{1}\t{2}\t{3}".format(as_str(self.chromosome), self.start, self.end, as_str(self.value))
+        return "{0}\t{1}\t{2}\t{3}".format(as_str(self.chromosome),
+                                           self.start, self.end,
+                                           as_str(self.value))
 
     def __bytes__(self):
         return b"\t".join(map(utf8, [getattr(self, x) for x in self._fields]))
 
     def __eq__(self, other):
-        return self.chromosome == other.chromosome and self.start == other.start and self.end == other.end
+        return self.chromosome == other.chromosome and \
+               self.start == other.start and self.end == other.end
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -73,7 +76,8 @@ def attempt_numeric(value):
 
 def get_bins(chromosome_length, binsize):
     """
-    Get list of 2-tuples of start and end positions of bins for a given chromosome
+    Get list of 2-tuples of start and end positions of bins for a given
+    chromosome
     :param chromosome_length: integer
     :param binsize: integer
     :return: list of 2-tuples of (start, end). Start = 0-based

@@ -69,7 +69,8 @@ def ztest(input_path, output_path, database_path):
 
 
 def create_key(bedline):
-    return b"|".join(map(utf8, [bedline.chromosome, bedline.start, bedline.end]))
+    return b"|".join(map(utf8, [bedline.chromosome, bedline.start,
+                                bedline.end]))
 
 
 def build_reference_index(database_path):
