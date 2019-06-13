@@ -16,7 +16,7 @@
 #    along with this program.  If not, see {http://www.gnu.org/licenses/}.
 from pyfaidx import Fasta
 
-from wisestork.gc import *
+from wisestork.gc import get_n_per_bin, get_gc_for_bin
 from wisestork.utils import get_bins
 
 

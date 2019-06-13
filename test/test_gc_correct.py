@@ -20,13 +20,14 @@ from pytest import fixture
 from wisestork.gc_correct import filter_bin, correct
 from wisestork.utils import BedLine, attempt_numeric
 
-import sys
 
 @fixture
 def bedlines():
     with open("test/data/count.bed") as count_handle:
-        bedlines = [BedLine(*map(attempt_numeric, x.split("\t"))) for x in count_handle]
+        bedlines = [BedLine(*map(attempt_numeric, x.split("\t"))) for x in
+                    count_handle]
     return bedlines
+
 
 @fixture
 def fasta():
@@ -44,6 +45,3 @@ class TestFunctions:
         for i in range(4):
             assert 0.9 < corrected[i].value < 1.1
         assert 0.4 < corrected[4].value < 0.6
-
-
-

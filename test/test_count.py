@@ -19,7 +19,8 @@ import pyfaidx
 
 from tempfile import NamedTemporaryFile
 from hashlib import sha1
-from wisestork.count import *
+from wisestork.count import (get_chromosomes_from_header, reads_per_bin,
+                             get_chromosomes_from_fasta, get_bins, count)
 
 
 class TestFunctions:
@@ -60,7 +61,8 @@ class TestMain:
 
     def test_with_binfile(self):
         tmp_file = NamedTemporaryFile()
-        count("test/data/test.bam", tmp_file.name, 100, "test/data/chrQ.fasta", "test/data/regions.bed")
+        count("test/data/test.bam", tmp_file.name, 100,
+              "test/data/chrQ.fasta", "test/data/regions.bed")
         output = b"".join(open(tmp_file.name, "rb").readlines())
         expected = b"".join(open("test/data/count.bed", "rb").readlines())
         assert sha1(output).hexdigest() == sha1(expected).hexdigest()

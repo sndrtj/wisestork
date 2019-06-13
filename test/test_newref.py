@@ -20,7 +20,8 @@ from tempfile import NamedTemporaryFile
 import pytest
 from pyfaidx import Fasta
 
-from wisestork.newref import *
+from wisestork.newref import (build_main_list, get_unique_bins,
+                              ReferenceBinGenerator, newref)
 from wisestork.utils import BedReader, BedLine
 
 
@@ -31,7 +32,8 @@ def fuzzed_files():
     fs = []
     for multi in multipliers:
         tmp = NamedTemporaryFile(delete=False)
-        t = [BedLine(x.chromosome, x.start, x.end, x.value*multi) for x in init]
+        t = [BedLine(x.chromosome, x.start, x.end, x.value*multi) for x in
+             init]
         for z in t:
             tmp.write(bytes(z) + b"\n")
         tmp.close()
@@ -73,7 +75,8 @@ class TestFunctions:
         assert main[2].start == 0
         assert main[3].start == 200
         assert main[4].start == 300
-        main_w_f = build_main_list(input_bins, 100, fasta, "test/data/regions.bed")
+        main_w_f = build_main_list(input_bins, 100, fasta,
+                                   "test/data/regions.bed")
         assert [x.start for x in main_w_f] == [x.start for x in main]
 
 
@@ -82,9 +85,11 @@ class TestReferenceBinGenerator:
     def test_init(self, fuzzed_files, fasta):
         ref1 = ReferenceBinGenerator(fuzzed_files, 5, fasta.filename, 100)
         assert len(ref1.get_all_bins()) == 5
-        ref2 = ReferenceBinGenerator(fuzzed_files, 5, fasta.filename, 100, "test/data/regions.bed")
+        ref2 = ReferenceBinGenerator(fuzzed_files, 5, fasta.filename, 100,
+                                     "test/data/regions.bed")
         assert len(ref2.get_all_bins()) == 5
-        assert [x.start for x in ref1.get_all_bins()] == [x.start for x in ref2.get_all_bins()]
+        assert [x.start for x in ref1.get_all_bins()] == [x.start for x in
+                                                          ref2.get_all_bins()]
 
     def test_get_nearest_and_filter(self, fuzzed_files, fasta):
         ref1 = ReferenceBinGenerator(fuzzed_files, 5, fasta.filename, 100)
@@ -111,19 +116,11 @@ class TestMain:
     def test_main(self, fuzzed_files, fasta):
         o = NamedTemporaryFile(delete=False)
         o.close()
-        newref(fuzzed_files, o.name, reference=fasta.filename, binsize=100, n_bins=5)
+        newref(fuzzed_files, o.name, reference=fasta.filename, binsize=100,
+               n_bins=5)
         m = hashlib.md5()
         with open(o.name) as handle:
             for l in handle:
                 m.update(l.encode('utf-8'))
         assert m.hexdigest() == "a719c83e318f75c296bcf41adb50593a"
         remove(o.name)
-
-
-
-
-
-
-
-
-

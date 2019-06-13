@@ -15,11 +15,14 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see {http://www.gnu.org/licenses/}.
 import pytest
-from wisestork.utils import *
+from wisestork.utils import (BedLine, utf8, as_str, attempt_numeric,
+                             get_bins, BedReader)
+
 
 @pytest.fixture
 def test_bedline():
     return BedLine(b"chr1", 1, 100, 20)
+
 
 class TestFunctions:
 
@@ -91,5 +94,3 @@ class TestBedReader:
         assert records[0].value == 10
         assert records[-1].value == 40
         assert all([x.chromosome == b"chr1" for x in records])
-
-
