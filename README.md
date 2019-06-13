@@ -16,7 +16,7 @@ see section Differences.
 
 ## Installation
 
-# PyPI
+### PyPI
 
 Install wisestork from PyPI with a simple:
 
