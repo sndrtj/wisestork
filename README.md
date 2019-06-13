@@ -16,6 +16,16 @@ see section Differences.
 
 ## Installation
 
+# PyPI
+
+Install wisestork from PyPI with a simple:
+
+```bash
+pip install wisestork
+```
+
+### Manually (development versions)
+
 The following system dependencies are required
 
 * Python 3.5+
