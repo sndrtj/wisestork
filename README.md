@@ -3,12 +3,13 @@
 
 Wisestork
 =======
-This is a complete re-implementation of the original Wisecondor program.
+This is a complete re-implementation of the original 
+[Wisecondor](https://github.com/VUmcCGP/wisecondor) program.
 Its original purpose was to detect trisomies and smaller CNVs in 
 maternal plasma samples using low-coverage WGS.
  
 Wisestork adds practical support for small bin sizes,
-and is intended to be useful on regular WGS and Exome sequencing as well
+and is intended to be useful on regular WGS and Exome sequencing as well.
 
 For a full overview of differences with the original Wisecondor, 
 see section Differences.
