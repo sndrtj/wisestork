@@ -9,4 +9,6 @@ install:
   - pip install '.'
 script:
   - flake8 --statistics wiseguy tests
-  - py.test -v --cov wiseguy --cov-report term-missing
+  - coverage run --source=wiseguy -m py.test -v test
+  - coverage xml
+  - coverage report -m
