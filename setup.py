@@ -18,9 +18,11 @@ with open(readme_file) as desc_handle:
 setup(
     name="wisestork",
     version="0.1.0",
-    description="",
+    description="Within-sample CNV calling",
     author="Sander Bollen",
-    license="GPL",
+    author_email="sander@sndrtj.eu",
+    python_requires=">=3.5",
+    license="GPLv3+",
     packages=find_packages(),
     install_requires=[
         "numpy",
@@ -39,7 +41,12 @@ setup(
         ]
     },
     classifiers=[
-        "Topic :: Scientific/Engineering :: Bio-Informatics"
+        "License :: OSI Approved :: GNU General Public License v3 or "
+        "later (GPLv3+)",
+        "Topic :: Scientific/Engineering :: Bio-Informatics",
+        "Programming Language :: Python :: 3 :: Only",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
     ]
 )
-
