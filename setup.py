@@ -23,6 +23,8 @@ setup(
     python_requires=">=3.5",
     license="GPLv3+",
     packages=find_packages(),
+    url="https://github.com/sndrtj/wisestork",
+    zip_safe=False,
     install_requires=[
         "numpy",
         "matplotlib",
