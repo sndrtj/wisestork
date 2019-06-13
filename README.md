@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/sndrtj/wisecondor.svg?branch=master)](https://travis-ci.org/sndrtj/wisecondor)
-[![Coverage Status](https://coveralls.io/repos/github/sndrtj/wisecondor/badge.svg?branch=master)](https://coveralls.io/github/sndrtj/wisecondor?branch=master)
+[![codecov](https://codecov.io/gh/sndrtj/wisecondor/branch/master/graph/badge.svg)](https://codecov.io/gh/sndrtj/wisecondor)
+
 Wiseguy
 =======
 This is a complete re-implementation of the original Wisecondor program.
