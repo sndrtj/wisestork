@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/sndrtj/wisestork.svg?branch=master)](https://travis-ci.org/sndrtj/wisestork) 
-[![codecov](https://codecov.io/gh/sndrtj/wisecondor/branch/master/graph/badge.svg)](https://codecov.io/gh/sndrtj/wisecondor)
+[![codecov](https://codecov.io/gh/sndrtj/wisestork/branch/master/graph/badge.svg)](https://codecov.io/gh/sndrtj/wisestork)
 
 Wisestork
 =======
