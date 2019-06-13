@@ -172,7 +172,7 @@ and the original wisecondor.
 Why name this tool wisestork, you might think?
 Well, a _condor_ is a bird. As this is a re-implementation / fork of
 wisecondor, I figured another bird would be nice name. As I live in The Hague,
-and The Hague has a stork as a ci ty symbol, I put one and one together.
+and The Hague has a stork as a city symbol, I put one and one together.
 Thus, _wisestork_ was born. 
 
 ## License
