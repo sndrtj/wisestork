@@ -1,9 +1,8 @@
 """
 setup.py
 ~~~~~~~~~~~~~
-:copyright: (c) 2016 Sander Bollen
-:copyright: (c) 2016 Leiden University Medical Center
-:license: GPL
+:copyright: (c) 2016-2019 Sander Bollen
+:license: GPL-3.0
 """
 from os.path import abspath, dirname, join
 
