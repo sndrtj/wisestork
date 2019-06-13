@@ -9,7 +9,7 @@ install:
   - pip install -r requirements-dev.txt
   - pip install '.'
 script:
-  - flake8 --statistics wisestork tests
+  - flake8 --statistics wisestork test
   - coverage run --source=wisestork -m py.test -v test
   - coverage xml
   - coverage report -m
