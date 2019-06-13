@@ -10,7 +10,6 @@ wiseguy.wiseguy
 
 import click
 
-from . import __version__
 from .count import count
 from .gc_correct import gc_correct
 from .newref import newref
@@ -163,12 +162,14 @@ def cli(**kwargs):
     """
     pass
 
+
 def main():
     cli.add_command(count_cli, "count")
     cli.add_command(gcc_cli, "gc-correct")
     cli.add_command(zscore_cli, "zscore")
     cli.add_command(newref_cli, "newref")
     cli()
+
 
 if __name__ == '__main__':
     main()
