@@ -14,6 +14,7 @@ from .count import count
 from .gc_correct import gc_correct
 from .newref import newref
 from .ztest import ztest
+from . import version as wiseguy_version
 
 shared_options = [
     click.option("--binsize", "-B", type=click.IntRange(0, None), default=50000,
@@ -22,7 +23,7 @@ shared_options = [
                  help="Path to reference fasta"),
     click.option('--bin-file', '-L', type=click.Path(exists=True), required=False,
                  help="Optional path to region BED file"),
-    click.version_option(version=__version__)
+    click.version_option(version=wiseguy_version())
 ]
 
 
