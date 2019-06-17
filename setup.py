@@ -16,7 +16,7 @@ with open(readme_file) as desc_handle:
 
 setup(
     name="wisestork",
-    version="0.1.1",
+    version="0.1.2",
     description="Within-sample CNV calling",
     long_description=long_desc,
     long_description_content_type="text/markdown",
